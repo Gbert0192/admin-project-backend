@@ -23,6 +23,6 @@ export const registerUser = async (payload) => {
       data: user,
     };
   } catch (error) {
-    logger.console.warn(error.message);
+    return error.message;
   }
 };

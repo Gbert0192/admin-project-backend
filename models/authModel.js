@@ -4,7 +4,7 @@ import bcrypt from "bcrypt";
 export const handleLogin = async (payload) => {
   try {
     const { nim, password } = payload;
-    const query = "SELECT * FROM users WHERE nim = ?";
+    const query = "SELECT * FROM users WHERE nim = $1";
     const [result] = await pool.query(query, [nim]);
 
     const user = result[0];
@@ -30,13 +30,14 @@ export const handleRegister = async (payload) => {
     const newPayload = { ...others, password: hashedPassword };
 
     const values = Object.values(newPayload);
-    const placeholder = values.map(() => "?").join(", ");
+    const placeholder = values.map((_, i) => `$${i + 1}`).join(", ");
+
     const keys = Object.keys(newPayload).join(", ");
 
     const query = `INSERT INTO users (${keys}) VALUES (${placeholder})`;
     const [result] = await pool.query(query, values);
     return result[0];
   } catch (error) {
-    throw new Error(error.message);
+    return error.message;
   }
 };
