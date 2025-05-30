@@ -1,3 +1,3 @@
 export function ValidateSchema(schema, req) {
-  return schema.parse(req.body);
+  return schema.parse(req);
 }

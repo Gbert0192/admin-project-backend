@@ -12,7 +12,7 @@ export const getAllUsers = async () => {
     return users;
   } catch (error) {
     logger.warn(error.message);
-    throw error; // lempar error ke controller (biar controller tau ada error)
+    throw error;
   }
 };
 
