@@ -11,7 +11,7 @@ export const getUsersController = async (req, res) => {
     const users = await getAllUsers();
     res.status(200).send({ data: users });
   } catch (err) {
-    res.status(404).json({ message: err.message });
+    res.status(400).json({ message: err.message });
   }
 };
 
@@ -21,7 +21,7 @@ export const getUserIdController = async (req, res) => {
     const user = await getUserId(id);
     res.status(200).send({ data: user });
   } catch (error) {
-    res.status(404).json({ message: error.message });
+    res.status(400).json({ message: error.message });
   }
 };
 
@@ -31,6 +31,6 @@ export const deleteUserController = async (req, res) => {
     const deletedUserData = await deletedUser(id);
     res.status(200).send({ data: deletedUserData });
   } catch (error) {
-    res.status(404).json({ message: error.message });
+    res.status(400).json({ message: error.message });
   }
 };

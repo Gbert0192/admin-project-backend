@@ -6,7 +6,7 @@ export const getAllUsers = async () => {
     const users = await getUsers();
 
     if (!users || users.length === 0) {
-      throw new Error("No users found");
+      return [];
     }
 
     return users;
