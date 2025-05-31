@@ -1,17 +1,16 @@
 import pool from "../config/database.js";
 import bcrypt from "bcrypt";
+import { withTransaction } from "../config/transaction.js";
 
 export const handleLogin = async (payload) => {
   try {
-    const { nim, password } = payload;
-    const query = "SELECT * FROM users WHERE nim = $1";
-    const [result] = await pool.query(query, [nim]);
-
-    const user = result[0];
+    const { student_id, password } = payload;
+    const query = "SELECT * FROM users WHERE student_id = $1";
+    const result = await pool.query(query, [student_id]);
+    const user = result.rows[0];
     if (!user) {
       throw new Error("User Not Found");
     }
-
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
       throw new Error("Invalid Credentials");
@@ -24,20 +23,26 @@ export const handleLogin = async (payload) => {
 };
 
 export const handleRegister = async (payload) => {
-  try {
-    const { password, ...others } = payload;
-    const hashedPassword = await bcrypt.hash(password, 10);
-    const newPayload = { ...others, password: hashedPassword };
+  return await withTransaction(async (client) => {
+    try {
+      const { password, ...others } = payload;
+      const hashedPassword = await bcrypt.hash(password, 10);
+      const newPayload = { ...others, password: hashedPassword };
 
-    const values = Object.values(newPayload);
-    const placeholder = values.map((_, i) => `$${i + 1}`).join(", ");
+      const values = Object.values(newPayload);
+      const placeholder = values.map((_, i) => `$${i + 1}`).join(", ");
+      const keys = Object.keys(newPayload).join(", ");
 
-    const keys = Object.keys(newPayload).join(", ");
+      const query = `INSERT INTO users (${keys}) VALUES (${placeholder}) RETURNING *`;
+      const result = await client.query(query, values);
 
-    const query = `INSERT INTO users (${keys}) VALUES (${placeholder})`;
-    const [result] = await pool.query(query, values);
-    return result[0];
-  } catch (error) {
-    return error.message;
-  }
+      return {
+        data: result.rows[0],
+        message: "User Created",
+        status: 201,
+      };
+    } catch (error) {
+      throw new Error(error.message);
+    }
+  });
 };

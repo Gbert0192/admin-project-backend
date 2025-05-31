@@ -1,24 +1,26 @@
-import logger from "../config/logger.js";
 import { handleLogin, handleRegister } from "../models/authModel.js";
+import { generateToken } from "../utils/tokenHelper.js";
 export const loginUser = async (payload) => {
   try {
     const user = await handleLogin(payload);
     if (!user) {
-      throw new Error("NIM atau password salah");
+      throw new Error("Invalid Credentials");
     }
-    return {
-      data: user,
-    };
+
+    const token = await generateToken({
+      user_name: user.name,
+      user_id: user.uuid,
+      student_id: user.student_id,
+    });
+
+    return { user, token, permission: [] };
   } catch (error) {
-    logger.console.warn(error.message);
+    throw new Error(error.message);
   }
 };
 export const registerUser = async (payload) => {
   try {
     const user = await handleRegister(payload);
-    if (!user) {
-      throw new Error("NIM atau password salah");
-    }
     return {
       data: user,
     };
