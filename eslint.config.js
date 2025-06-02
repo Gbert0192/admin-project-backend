@@ -15,7 +15,6 @@ export default defineConfig([
     },
     extends: [js.configs.recommended],
     rules: {
-      // Best Practices
       eqeqeq: "warn", // pakai === bukan ==
       curly: "warn", // selalu pakai kurung kurawal di if/else/while
       "no-eval": "error", // jangan pake eval()

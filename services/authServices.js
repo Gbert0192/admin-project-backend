@@ -6,7 +6,6 @@ export const loginUser = async (payload) => {
     if (!user) {
       throw new Error("Invalid Credentials");
     }
-
     const token = await generateToken({
       user_name: user.name,
       user_id: user.uuid,
