@@ -1,6 +1,7 @@
 import pool from "../config/database.js";
 import bcrypt from "bcrypt";
 import { withTransaction } from "../config/transaction.js";
+import { findRoleByName } from "./roleModels.js";
 
 export const handleLogin = async (payload) => {
   try {
@@ -25,9 +26,12 @@ export const handleLogin = async (payload) => {
 export const handleRegister = async (payload) => {
   return await withTransaction(async (client) => {
     try {
-      const { password, ...others } = payload;
+      const { password, role_name, ...others } = payload;
       const hashedPassword = await bcrypt.hash(password, 10);
-      const newPayload = { ...others, password: hashedPassword };
+
+      const role_id = await findRoleByName(role_name);
+
+      const newPayload = { ...others, password: hashedPassword, role_id };
 
       const values = Object.values(newPayload);
       const placeholder = values.map((_, i) => `$${i + 1}`).join(", ");
