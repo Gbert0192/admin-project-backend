@@ -1,9 +1,11 @@
 import { Router } from "express";
 import {
   createRoleController,
-  getRoleByIdController,
+  getRolesWithPermissionsController,
+  updateRolePermissionController,
 } from "../controllers/roleControllers.js";
 export const RoleRouter = Router();
 
 RoleRouter.post("/", createRoleController);
-RoleRouter.get("/:id", getRoleByIdController);
+RoleRouter.put("/:id", updateRolePermissionController);
+RoleRouter.get("/with-permissions", getRolesWithPermissionsController);

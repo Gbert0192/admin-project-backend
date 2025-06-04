@@ -1,7 +1,11 @@
-import { createRoleSchema, getRoleByIdSchema } from "../schemas/roleSchema.js";
+import {
+  createRoleSchema,
+  updateRolePermissionSchema,
+} from "../schemas/roleSchema.js";
 import {
   createRoleService,
-  getRoleByIdService,
+  getRolesWithPermissionService,
+  updateRolePermissionService,
 } from "../services/roleServices.js";
 import { ValidateSchema } from "../utils/validateSchema.js";
 
@@ -18,14 +22,32 @@ export const createRoleController = async (req, res) => {
   }
 };
 
-export const getRoleByIdController = async (req, res) => {
+export const updateRolePermissionController = async (req, res) => {
   try {
-    const { id } = ValidateSchema(getRoleByIdSchema, req.params);
-    const role = await getRoleByIdService(id);
+    const { id, permission_id } = ValidateSchema(
+      updateRolePermissionSchema,
+      req.body
+    );
+    const role = await updateRolePermissionService(id, permission_id);
     if (!role) {
       return res.status(404).json({ error: "Role not found" });
     }
-    res.status(200).json(role);
+    res.status(200).json({
+      data: role,
+      message: "Role permission updated successfully",
+    });
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+};
+
+export const getRolesWithPermissionsController = async (req, res) => {
+  try {
+    const roles = await getRolesWithPermissionService();
+    res.status(200).json({
+      data: roles,
+      message: "Roles retrieved successfully",
+    });
   } catch (error) {
     res.status(400).json({ error: error.message });
   }
