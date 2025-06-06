@@ -9,7 +9,7 @@ interface Permission {
 }
 
 export class PermissionModel extends BaseModel {
-  async createPermission(routes: string[]): Promise<Permission> {
+  async createPermission(routes: string[]) {
     try {
       const query = "INSERT INTO permissions (route) VALUES ($1) RETURNING *";
       const result = await this._db.query(query, [routes]);
@@ -19,7 +19,7 @@ export class PermissionModel extends BaseModel {
     }
   }
 
-  async getAllPermissions(): Promise<Permission[]> {
+  async getAllPermissions() {
     try {
       const query = "SELECT * FROM permissions WHERE deleted_at IS NULL";
       const result = await this._db.query(query);
@@ -29,19 +29,23 @@ export class PermissionModel extends BaseModel {
     }
   }
 
-  async getPermissionById(id: number): Promise<Permission | null> {
+  async getPermissionById(id: number) {
     try {
       const query = "SELECT * FROM permissions WHERE id = $1";
       const result = await this._db.query(query, [id]);
       return result.rows[0] || null;
     } catch (error) {
-      throw new Error((error as Error).message);  
+      throw new Error((error as Error).message);
     }
   }
 
-  async updatePermission(id: number, route: string): Promise<Permission | null> {
+  async updatePermission(
+    id: number,
+    route: string
+  ): Promise<Permission | null> {
     try {
-      const query = "UPDATE permissions SET route = $1 WHERE id = $2 RETURNING *";
+      const query =
+        "UPDATE permissions SET route = $1 WHERE id = $2 RETURNING *";
       const result = await this._db.query(query, [route, id]);
       return result.rows[0] || null;
     } catch (error) {

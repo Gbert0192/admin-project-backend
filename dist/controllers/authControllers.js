@@ -6,12 +6,28 @@ import { loginPayloadSchema, registerSchema, } from "../schemas/authSchema/auth.
 import pool from "../config/database.js";
 import { AppError } from "../middleware/errorMiddleware.js";
 export const LoginController = async (req, res) => {
-    await createTransaction(pool)(async (db) => {
-        const body = ValidateSchema(loginPayloadSchema, req.body);
-        const authModel = new AuthModel(db);
-        const user = await loginUserService(authModel)(body);
-        res.send({ data: user, code: 200, message: "Login Successful" });
-    });
+    try {
+        await createTransaction(pool)(async (db) => {
+            const body = ValidateSchema(loginPayloadSchema, req.body);
+            const authModel = new AuthModel(db);
+            const user = await loginUserService(authModel)(body);
+            res
+                .status(200)
+                .json({ data: user, code: 200, message: "Login Successful" });
+        });
+    }
+    catch (error) {
+        let status = 500;
+        let message = "Internal Server Error";
+        if (error instanceof Error) {
+            if (error.message === "User not found")
+                status = 404;
+            else if (error.message === "Invalid credentials")
+                status = 401;
+            message = error.message;
+        }
+        res.status(status).json({ message });
+    }
 };
 export const RegisterController = async (req, res) => {
     await createTransaction(pool)(async (db) => {
