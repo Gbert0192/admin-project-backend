@@ -5,6 +5,7 @@ import logger from "./config/logger.js";
 import { notFoundHandler } from "./middleware/errorMiddleware.js";
 import { AuthRouter } from "./routes/authRoutes.js";
 import UserRouter from "./routes/userRoutes.js";
+import { PermissionRouter } from "./routes/permissionRoutes.js";
 
 dotenv.config();
 
@@ -17,6 +18,7 @@ app.use(express.urlencoded({ extended: true }));
 
 app.use("/auth", AuthRouter);
 app.use("/user", UserRouter);
+app.use("/permissions", PermissionRouter);
 
 app.use(notFoundHandler);
 
