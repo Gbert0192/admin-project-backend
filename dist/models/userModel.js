@@ -36,8 +36,8 @@ export class UserModel extends BaseModel {
     async getUserByStudentId(id) {
         try {
             const query = "SELECT * FROM users WHERE student_id = $1";
-            const { rows } = await this._db.query(query, [id]);
-            return rows[0];
+            const res = await this._db.query(query, [id]);
+            return res.rows[0];
         }
         catch (error) {
             throw new Error(error.message);

@@ -46,8 +46,9 @@ export default tseslint.config(
       quotes: ["warn", "double"],
       indent: ["warn", 2],
 
-      "no-unused-vars": "off", // Matikan aturan bawaan ESLint
-      "@typescript-eslint/no-unused-vars": "warn", // Gunakan aturan dari typescript-eslint
+      "no-unused-vars": "warn",
+      "@typescript-eslint/no-unused-vars": "warn",
+      "@typescript-eslint/no-var-requires": "warn",
       "@typescript-eslint/no-explicit-any": "warn",
     },
   }

@@ -1,27 +1,15 @@
 import { generateToken } from "../utils/tokenHelper.js";
-import { LoginSchema } from "../schemas/authSchema/auth.schema.js";
+import {
+  LoginSchema,
+  RegisterSchema,
+} from "../schemas/authSchema/auth.schema.js";
 import { AuthModel } from "../models/authModel.js";
-import { AppError } from "../middleware/errorMiddleware.js";
 import bcrypt from "bcrypt";
-
-// interface LoginResponse {
-//   user: User;
-//   token: string;
-//   permission: string[];
-// }
-
-// interface RegisterResponse {
-//   data: {
-//     data: User;
-//     message: string;
-//     status: number;
-//   };
-// }
 
 export const loginUserService =
   (authModel: AuthModel) => async (payload: LoginSchema) => {
     try {
-      const user = await authModel.findUser(payload);
+      const user = await authModel.findUser(payload.student_id);
       if (!user) {
         throw new Error("User not found");
       }
@@ -46,14 +34,20 @@ export const loginUserService =
     }
   };
 
-// export const registerUserService = async (
-//   payload: RegisterSchema,
-//   handleRegisterModel: (
-//     payload: RegisterSchema
-//   ) => Promise<RegisterResponse["data"]>
-// ): Promise<RegisterResponse> => {
-//   const user = await handleRegisterModel(payload);
-//   return {
-//     data: user,
-//   };
-// };
+export const RegisterUserService =
+  (authModel: AuthModel) => async (payload: RegisterSchema) => {
+    try {
+      const existingUser = await authModel.findUser(payload.student_id);
+      if (existingUser) {
+        throw new Error("User already exists");
+      }
+      const hashedPassword = await bcrypt.hash(payload.password, 10);
+      const newUser = await authModel.createUser({
+        ...payload,
+        password: hashedPassword,
+      });
+      return { user: newUser, message: "Registration successful" };
+    } catch (error) {
+      throw new Error((error as Error).message);
+    }
+  };

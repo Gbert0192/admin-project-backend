@@ -1,6 +1,9 @@
 import bcrypt from "bcrypt";
 
-import { LoginSchema } from "../schemas/authSchema/auth.schema.js";
+import {
+  LoginSchema,
+  RegisterSchema,
+} from "../schemas/authSchema/auth.schema.js";
 import { BaseModel } from "./baseModel.js";
 import { AppError } from "../middleware/errorMiddleware.js";
 import { User } from "../schemas/user/user.type.js";
@@ -72,17 +75,20 @@ import { User } from "../schemas/user/user.type.js";
 // };
 
 export class AuthModel extends BaseModel {
-  async findUser(payload: LoginSchema) {
-    try {
-      const { student_id } = payload;
-      const query = "SELECT * FROM users WHERE student_id = $1";
-      const result = await this._db.query(query, [student_id]);
-      const user = result.rows[0] as User;
-      return user;
-    } catch (error) {
-      if (error instanceof Error) {
-        throw new AppError(error.message, 400);
-      }
-    }
+  async findUser(student_id: string) {
+    const query = "SELECT * FROM users WHERE student_id = $1";
+    const result = await this._db.query(query, [student_id]);
+    const user = result.rows[0] as User;
+    return user;
+  }
+
+  async createUser(payload: RegisterSchema) {
+    const value = Object.values(payload);
+    const placeholder = value.map((_, i) => `$${i + 1}`).join(", ");
+    const keys = Object.keys(payload).join(", ");
+    const query = `INSERT INTO users (${keys}) VALUES (${placeholder}) RETURNING *`;
+    const result = await this._db.query(query, value);
+    const user = result.rows[0] as User;
+    return user;
   }
 }

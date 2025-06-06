@@ -1,5 +1,4 @@
 import { BaseModel } from "./baseModel.js";
-import { AppError } from "../middleware/errorMiddleware.js";
 // interface LoginPayload {
 //   student_id: string;
 //   password: string;
@@ -58,19 +57,20 @@ import { AppError } from "../middleware/errorMiddleware.js";
 //   }
 // };
 export class AuthModel extends BaseModel {
-    async findUser(payload) {
-        try {
-            const { student_id } = payload;
-            const query = "SELECT * FROM users WHERE student_id = $1";
-            const result = await this._db.query(query, [student_id]);
-            const user = result.rows[0];
-            return user;
-        }
-        catch (error) {
-            if (error instanceof Error) {
-                throw new AppError(error.message, 400);
-            }
-        }
+    async findUser(student_id) {
+        const query = "SELECT * FROM users WHERE student_id = $1";
+        const result = await this._db.query(query, [student_id]);
+        const user = result.rows[0];
+        return user;
+    }
+    async createUser(payload) {
+        const value = Object.values(payload);
+        const placeholder = value.map((_, i) => `$${i + 1}`).join(", ");
+        const keys = Object.keys(payload).join(", ");
+        const query = `INSERT INTO users (${keys}) VALUES (${placeholder}) RETURNING *`;
+        const result = await this._db.query(query, value);
+        const user = result.rows[0];
+        return user;
     }
 }
 //# sourceMappingURL=authModel.js.map

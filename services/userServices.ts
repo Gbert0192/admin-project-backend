@@ -9,9 +9,13 @@ export const getUserService = (userModel: UserModel) => () => {
 };
 
 export const getUserByStudentIdService =
-  (userModel: UserModel) => (student_id: string) => {
+  (userModel: UserModel) => async (student_id: string) => {
     try {
-      return userModel.getUserByStudentId(student_id);
+      const user = await userModel.getUserByStudentId(student_id);
+      if (!user) {
+        throw new Error("User not found");
+      }
+      return user;
     } catch (error) {
       throw new Error((error as Error).message);
     }

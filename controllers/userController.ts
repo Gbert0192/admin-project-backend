@@ -31,7 +31,7 @@ export const GetUserControllerByStudentId = async (
 ) => {
   const userModel = new UserModel(pool);
   const student_id = req.params.student_id;
-  const user = getUserByStudentIdService(userModel)(student_id);
+  const user = await getUserByStudentIdService(userModel)(student_id);
   if (!user) {
     res.send({ data: null, code: 404, message: "User not found" });
   }
