@@ -24,9 +24,7 @@ export const CreatePermissionController = async (
     const permissionModel = new PermissionModel(pool);
     const { route } = ValidateSchema(permissionBodySchema, req.body);
     const permission = await createPermissionService(permissionModel)(route);
-
     const filteredPermission = pickKey(permission, [
-      "id",
       "route",
       "created_at",
       "updated_at",
@@ -52,7 +50,6 @@ export const GetAllPermissionsController = async (
     const permissions = await getAllPermissionsService(permissionModel)();
     const filteredPermissions = permissions.map((permission) => {
       return pickKey(permission, [
-        "id",
         "route",
         "created_at",
         "updated_at",
@@ -73,7 +70,7 @@ export const GetAllPermissionsController = async (
 export const GetPermissionByIdController: RequestHandler = async (
   req: Request,
   res: Response
-): Promise<void> => {
+) => {
   try {
     const permissionModel = new PermissionModel(pool);
     const { id } = ValidateSchema(permissionParamsSchema, req.params);
@@ -86,7 +83,6 @@ export const GetPermissionByIdController: RequestHandler = async (
       return;
     }
     const filteredPermission = pickKey(permission, [
-      "id",
       "route",
       "created_at",
       "updated_at",
@@ -106,7 +102,7 @@ export const GetPermissionByIdController: RequestHandler = async (
 export const UpdatePermissionController: RequestHandler = async (
   req: Request,
   res: Response
-): Promise<void> => {
+) => {
   try {
     const { id } = ValidateSchema(permissionParamsSchema, req.params);
     const { route } = ValidateSchema(permissionBodySchema, req.body);
@@ -123,7 +119,6 @@ export const UpdatePermissionController: RequestHandler = async (
       return;
     }
     const filteredPermission = pickKey(permission, [
-      "id",
       "route",
       "created_at",
       "updated_at",
@@ -143,7 +138,7 @@ export const UpdatePermissionController: RequestHandler = async (
 export const DeletePermissionController: RequestHandler = async (
   req: Request,
   res: Response
-): Promise<void> => {
+) => {
   try {
     const permissionModel = new PermissionModel(pool);
     const { id } = ValidateSchema(permissionParamsSchema, req.params);
@@ -156,7 +151,6 @@ export const DeletePermissionController: RequestHandler = async (
       return;
     }
     const filteredPermission = pickKey(permission, [
-      "id",
       "route",
       "created_at",
       "updated_at",

@@ -7,41 +7,23 @@ export class AppError extends Error {
         Error.captureStackTrace(this, this.constructor);
     }
 }
-export const errorHandler = (err, req, res) => {
-    let error = { ...err };
-    error.message = err.message;
-    logger.error(`${err.name}: ${err.message}`);
+export const errorHandler = (err, req, res, 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars, no-unused-vars
+_next) => {
+    logger.error(`[${req.method}] ${req.path} - ${err.name}: ${err.message}`);
     logger.error(err.stack);
     if (err instanceof AppError) {
-        return res.status(err.statusCode).json({
+        res.status(err.statusCode).json({
             message: err.message,
             ...(process.env.NODE_ENV === "development" && { stack: err.stack }),
         });
+        return;
     }
-    if (err.name === "ValidationError") {
-        const message = Object.values(err.name)
-            .map((val) => val.message)
-            .join(", ");
-        error = new AppError(message, 400);
-    }
-    if (err.code === 11000) {
-        const message = "Duplicate field value entered";
-        error = new AppError(message, 400);
-    }
-    if (err.name === "CastError") {
-        const message = "Invalid ID format";
-        error = new AppError(message, 400);
-    }
-    if (err.name === "JsonWebTokenError") {
-        const message = "Invalid token. Please log in again";
-        error = new AppError(message, 401);
-    }
-    if (err.name === "TokenExpiredError") {
-        const message = "Your token has expired. Please log in again";
-        error = new AppError(message, 401);
-    }
-    res.status(error.statusCode || 500).json({
-        message: error.message || "Something went wrong",
+    const message = process.env.NODE_ENV === "development"
+        ? err.message
+        : "Terjadi kesalahan pada server.";
+    res.status(500).json({
+        message,
         ...(process.env.NODE_ENV === "development" && { stack: err.stack }),
     });
 };
@@ -52,9 +34,18 @@ export const notFoundHandler = (req, res) => {
         message: error.message,
     });
 };
-export const asyncHandler = (fn) => {
-    return (req, res, next) => {
-        Promise.resolve(fn(req, res, next)).catch(next);
-    };
-};
+export function handleErrorResponse(res, error) {
+    let status = 500;
+    let message = "Internal Server Error";
+    if (error instanceof Error) {
+        if (error.message === "User not found") {
+            status = 404;
+        }
+        else if (error.message === "Invalid credentials") {
+            status = 401;
+        }
+        message = error.message;
+    }
+    res.status(status).json({ data: null, code: status, message });
+}
 //# sourceMappingURL=errorMiddleware.js.map

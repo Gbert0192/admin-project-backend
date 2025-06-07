@@ -1,4 +1,4 @@
-import { Request, Response, NextFunction } from "express";
+import { ErrorRequestHandler, NextFunction, Request, Response } from "express";
 import logger from "../config/logger.js";
 
 export class AppError extends Error {
@@ -12,53 +12,31 @@ export class AppError extends Error {
     Error.captureStackTrace(this, this.constructor);
   }
 }
-
-export const errorHandler = (
+export const errorHandler: ErrorRequestHandler = (
   err: Error | AppError,
   req: Request,
-  res: Response
+  res: Response,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars, no-unused-vars
+  _next: NextFunction
 ) => {
-  let error = { ...err };
-  error.message = err.message;
-
-  logger.error(`${err.name}: ${err.message}`);
+  logger.error(`[${req.method}] ${req.path} - ${err.name}: ${err.message}`);
   logger.error(err.stack);
+
   if (err instanceof AppError) {
-    return res.status(err.statusCode).json({
+    res.status(err.statusCode).json({
       message: err.message,
       ...(process.env.NODE_ENV === "development" && { stack: err.stack }),
     });
+    return;
   }
 
-  if (err.name === "ValidationError") {
-    const message = Object.values((err as Error).name)
-      .map((val: any) => val.message)
-      .join(", ");
-    error = new AppError(message, 400);
-  }
+  const message =
+    process.env.NODE_ENV === "development"
+      ? err.message
+      : "Terjadi kesalahan pada server.";
 
-  if ((err as any).code === 11000) {
-    const message = "Duplicate field value entered";
-    error = new AppError(message, 400);
-  }
-
-  if (err.name === "CastError") {
-    const message = "Invalid ID format";
-    error = new AppError(message, 400);
-  }
-
-  if (err.name === "JsonWebTokenError") {
-    const message = "Invalid token. Please log in again";
-    error = new AppError(message, 401);
-  }
-
-  if (err.name === "TokenExpiredError") {
-    const message = "Your token has expired. Please log in again";
-    error = new AppError(message, 401);
-  }
-
-  res.status((error as AppError).statusCode || 500).json({
-    message: error.message || "Something went wrong",
+  res.status(500).json({
+    message,
     ...(process.env.NODE_ENV === "development" && { stack: err.stack }),
   });
 };
@@ -71,10 +49,18 @@ export const notFoundHandler = (req: Request, res: Response) => {
   });
 };
 
-export const asyncHandler = (
-  fn: (req: Request, res: Response, next: NextFunction) => Promise<unknown>
-) => {
-  return (req: Request, res: Response, next: NextFunction) => {
-    Promise.resolve(fn(req, res, next)).catch(next);
-  };
-};
+export function handleErrorResponse(res: Response, error: Error) {
+  let status = 500;
+  let message = "Internal Server Error";
+
+  if (error instanceof Error) {
+    if (error.message === "User not found") {
+      status = 404;
+    } else if (error.message === "Invalid credentials") {
+      status = 401;
+    }
+    message = error.message;
+  }
+
+  res.status(status).json({ data: null, code: status, message });
+}

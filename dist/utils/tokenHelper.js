@@ -2,7 +2,7 @@ import jwt from "jsonwebtoken";
 export async function generateToken(payload) {
     try {
         const token = jwt.sign(payload, process.env.JWT_SECRET, {
-            expiresIn: "5s",
+            expiresIn: "30d",
         });
         return token;
     }

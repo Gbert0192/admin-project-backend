@@ -1,11 +1,10 @@
-import { loginUserService, RegisterUserService, } from "../services/authServices.js";
+import pool from "../config/database.js";
 import { createTransaction } from "../config/transaction.js";
-import { ValidateSchema } from "../utils/validateSchema.js";
 import { AuthModel } from "../models/authModel.js";
 import { loginPayloadSchema, registerSchema, } from "../schemas/authSchema/auth.schema.js";
-import pool from "../config/database.js";
-import { AppError } from "../middleware/errorMiddleware.js";
-export const LoginController = async (req, res) => {
+import { loginUserService, RegisterUserService, } from "../services/authServices.js";
+import { ValidateSchema } from "../utils/validateSchema.js";
+export const LoginController = async (req, res, next) => {
     try {
         await createTransaction(pool)(async (db) => {
             const body = ValidateSchema(loginPayloadSchema, req.body);
@@ -17,32 +16,20 @@ export const LoginController = async (req, res) => {
         });
     }
     catch (error) {
-        let status = 500;
-        let message = "Internal Server Error";
-        if (error instanceof Error) {
-            if (error.message === "User not found")
-                status = 404;
-            else if (error.message === "Invalid credentials")
-                status = 401;
-            message = error.message;
-        }
-        res.status(status).json({ message });
+        next(error);
     }
 };
-export const RegisterController = async (req, res) => {
-    await createTransaction(pool)(async (db) => {
-        try {
+export const RegisterController = async (req, res, next) => {
+    try {
+        await createTransaction(pool)(async (db) => {
             const body = ValidateSchema(registerSchema, req.body);
             const authModel = new AuthModel(db);
             const user = await RegisterUserService(authModel)(body);
             res.send({ data: user, code: 201, message: "Registration Successful" });
-        }
-        catch (error) {
-            if (error instanceof Error) {
-                throw new AppError(error.message, 500);
-            }
-            throw new AppError("Unknown error occurred", 500);
-        }
-    });
+        });
+    }
+    catch (error) {
+        next(error);
+    }
 };
 //# sourceMappingURL=authControllers.js.map

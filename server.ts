@@ -2,10 +2,10 @@ import cors from "cors";
 import dotenv from "dotenv";
 import express, { Express } from "express";
 import logger from "./config/logger.js";
-import { notFoundHandler } from "./middleware/errorMiddleware.js";
+import { errorHandler, notFoundHandler } from "./middleware/errorMiddleware.js";
 import { AuthRouter } from "./routes/authRoutes.js";
-import UserRouter from "./routes/userRoutes.js";
 import { PermissionRouter } from "./routes/permissionRoutes.js";
+import UserRouter from "./routes/userRoutes.js";
 
 dotenv.config();
 
@@ -20,8 +20,9 @@ app.use("/auth", AuthRouter);
 app.use("/user", UserRouter);
 app.use("/permissions", PermissionRouter);
 
-app.use(notFoundHandler);
+app.use(errorHandler);
 
+app.use(notFoundHandler);
 app.listen(port, () => {
   logger.info(`Server is running on port ${port}`);
 });

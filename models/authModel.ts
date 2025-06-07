@@ -1,12 +1,6 @@
-import bcrypt from "bcrypt";
-
-import {
-  LoginSchema,
-  RegisterSchema,
-} from "../schemas/authSchema/auth.schema.js";
-import { BaseModel } from "./baseModel.js";
-import { AppError } from "../middleware/errorMiddleware.js";
+import { RegisterSchema } from "../schemas/authSchema/auth.schema.js";
 import { User } from "../schemas/user/user.type.js";
+import { BaseModel } from "./baseModel.js";
 
 // interface LoginPayload {
 //   student_id: string;
@@ -76,7 +70,8 @@ import { User } from "../schemas/user/user.type.js";
 
 export class AuthModel extends BaseModel {
   async findUser(student_id: string) {
-    const query = "SELECT * FROM users WHERE student_id = $1";
+    const query =
+      "SELECT * FROM users WHERE student_id = $1 and deleted_at is null";
     const result = await this._db.query(query, [student_id]);
     const user = result.rows[0] as User;
     return user;

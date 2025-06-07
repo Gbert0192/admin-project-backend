@@ -58,7 +58,7 @@ import { BaseModel } from "./baseModel.js";
 // };
 export class AuthModel extends BaseModel {
     async findUser(student_id) {
-        const query = "SELECT * FROM users WHERE student_id = $1";
+        const query = "SELECT * FROM users WHERE student_id = $1 and deleted_at is null";
         const result = await this._db.query(query, [student_id]);
         const user = result.rows[0];
         return user;
