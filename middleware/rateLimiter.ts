@@ -1,22 +1,16 @@
-import { PostgresStore } from "@acpr/rate-limit-postgresql";
 import rateLimit from "express-rate-limit";
-import pool from "../config/database.js";
 
 export const apiLimiter = rateLimit({
-  windowMs: 10000,
-  max: 3,
-  standardHeaders: true,
-  legacyHeaders: false,
-  store: new PostgresStore(
-    {
-      client: pool,
-      tableName: "rate_limit_sessions",
-      schemaName: "public",
-    },
-    "api_limiter"
-  ),
+  windowMs: 60 * 1000,
+  max: 20,
   message: {
     status: 429,
-    message: "Too many requests, please try again later.",
+    error: "Too many requests",
+    message: "Too Many requestt, please try again later.",
+  },
+  standardHeaders: true,
+  legacyHeaders: false,
+  keyGenerator: (req) => {
+    return req.ip || "";
   },
 });

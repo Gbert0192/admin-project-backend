@@ -1,5 +1,7 @@
 import { Pool, PoolClient } from "pg";
 
 export class BaseModel {
-  constructor(protected readonly _db: Pool | PoolClient) {}
+  constructor(protected readonly _db: Pool | PoolClient) {
+    this._db = _db;
+  }
 }

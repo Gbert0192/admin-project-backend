@@ -33,11 +33,8 @@ export async function authMiddleware(
         401
       );
     }
-
     const token = authHeader.split(" ")[1];
-
     const decoded = (await verifyToken(token)) as DecodedToken;
-
     req.user = decoded;
 
     next();

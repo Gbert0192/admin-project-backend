@@ -16,11 +16,15 @@ const port: number = parseInt(process.env.PORT || "8000", 10);
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+app.set("trust proxy", 1);
+
 app.use(apiLimiter);
-  
+
 app.use("/auth", AuthRouter);
 app.use("/user", UserRouter);
 app.use("/permissions", PermissionRouter);
+// app.use("/roles", RoleRouter);
 
 app.use(errorHandler);
 
@@ -28,3 +32,8 @@ app.use(notFoundHandler);
 app.listen(port, () => {
   logger.info(`Server is running on port ${port}`);
 });
+
+// process.on("uncaughtException", (err) => {
+//   logger.error("Uncaught Exception thrown:", err.message);
+//   process.exit(1);
+// });
