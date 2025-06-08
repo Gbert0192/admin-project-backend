@@ -18,7 +18,7 @@ interface DecodedToken extends TokenPayload {
 export async function generateToken(payload: TokenPayload) {
   try {
     const token = jwt.sign(payload, process.env.JWT_SECRET as string, {
-      expiresIn: "5s",
+      expiresIn: "30d",
     });
     return token;
   } catch (error) {

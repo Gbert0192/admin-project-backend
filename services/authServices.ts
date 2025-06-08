@@ -35,7 +35,7 @@ export const RegisterUserService =
   (authModel: AuthModel) => async (payload: RegisterSchema) => {
     const existingUser = await authModel.findUser(payload.student_id);
     if (existingUser) {
-      throw new Error("User already exists");
+      throw new AppError("User already Exists", 400);
     }
     const hashedPassword = await bcrypt.hash(payload.password, 10);
     const newUser = await authModel.createUser({
