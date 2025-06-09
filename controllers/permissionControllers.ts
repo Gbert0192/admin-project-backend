@@ -147,10 +147,6 @@ export const DeletePermissionController: RequestHandler = async (
     });
     return;
   } catch (error) {
-    res.send({
-      code: 500,
-      message: (error as Error).message,
-    });
-    return;
+    next(error);
   }
 };
