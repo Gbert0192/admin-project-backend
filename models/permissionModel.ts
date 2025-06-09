@@ -9,7 +9,7 @@ export class PermissionModel extends BaseModel {
   async createPermission(payload: PermissionBodySchema) {
     const query = `
       INSERT INTO permissions (route, permission_name)
-      VALUES ($1::text[], $2)
+      VALUES ($1, $2)
       RETURNING *
     `;
     const result = await this._db.query(query, [
