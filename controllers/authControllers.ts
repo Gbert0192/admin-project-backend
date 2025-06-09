@@ -3,14 +3,9 @@ import pool from "../config/database.js";
 import { createTransaction } from "../config/transaction.js";
 import { AuthModel } from "../models/authModel.js";
 import {
-  loginPayloadSchema,
-  registerSchema,
-} from "../schemas/authSchema/auth.schema.js";
-import {
   loginUserService,
   RegisterUserService,
 } from "../services/authServices.js";
-import { ValidateSchema } from "../utils/validateSchema.js";
 
 export const LoginController = async (
   req: Request,
@@ -19,9 +14,8 @@ export const LoginController = async (
 ) => {
   try {
     await createTransaction(pool)(async (db) => {
-      const body = ValidateSchema(loginPayloadSchema, req.body);
       const authModel = new AuthModel(db);
-      const user = await loginUserService(authModel)(body);
+      const user = await loginUserService(authModel)(req.body);
       res
         .status(200)
         .json({ data: user, code: 200, message: "Login Successful" });
@@ -38,9 +32,8 @@ export const RegisterController = async (
 ) => {
   try {
     await createTransaction(pool)(async (db) => {
-      const body = ValidateSchema(registerSchema, req.body);
       const authModel = new AuthModel(db);
-      const user = await RegisterUserService(authModel)(body);
+      const user = await RegisterUserService(authModel)(req.body);
       res.send({ data: user, code: 201, message: "Registration Successful" });
     });
   } catch (error) {

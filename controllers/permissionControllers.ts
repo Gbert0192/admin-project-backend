@@ -1,5 +1,5 @@
 import pool from "../config/database.js";
-import { RequestHandler } from "express";
+import { NextFunction, RequestHandler } from "express";
 import { PermissionModel } from "../models/permissionModel.js";
 import {
   createPermissionService,
@@ -10,19 +10,15 @@ import {
 } from "../services/permissionServices.js";
 import { Request, Response } from "express";
 import { pickKey } from "../utils/queryHelper.js";
-import { ValidateSchema } from "../utils/validateSchema.js";
-import {
-  permissionBodySchema,
-  permissionParamsSchema,
-} from "../schemas/permissionSchema.js";
 
 export const CreatePermissionController = async (
   req: Request,
-  res: Response
+  res: Response,
+  next: NextFunction
 ) => {
   try {
     const permissionModel = new PermissionModel(pool);
-    const { route } = ValidateSchema(permissionBodySchema, req.body);
+    const route = req.body.route;
     const permission = await createPermissionService(permissionModel)(route);
     const filteredPermission = pickKey(permission, [
       "route",
@@ -36,14 +32,14 @@ export const CreatePermissionController = async (
       message: "Permission created successfully!",
     });
   } catch (error) {
-    res.send({ code: 500, message: (error as Error).message });
-    return;
+    next(error);
   }
 };
 
 export const GetAllPermissionsController = async (
   req: Request,
-  res: Response
+  res: Response,
+  next: NextFunction
 ) => {
   try {
     const permissionModel = new PermissionModel(pool);
@@ -62,19 +58,19 @@ export const GetAllPermissionsController = async (
       message: "Get all permissions successfully!",
     });
   } catch (error) {
-    res.send({ code: 500, message: (error as Error).message });
-    return;
+    next(error);
   }
 };
 
 export const GetPermissionByIdController: RequestHandler = async (
   req: Request,
-  res: Response
+  res: Response,
+  next: NextFunction
 ) => {
   try {
     const permissionModel = new PermissionModel(pool);
-    const { id } = ValidateSchema(permissionParamsSchema, req.params);
-    const permission = await getPermissionByIdService(permissionModel)(id);
+    const uuid = req.params.uuid;
+    const permission = await getPermissionByIdService(permissionModel)(uuid);
     if (!permission) {
       res.send({
         code: 404,
@@ -94,30 +90,18 @@ export const GetPermissionByIdController: RequestHandler = async (
       message: "Get permission successfully!",
     });
   } catch (error) {
-    res.send({ code: 500, message: (error as Error).message });
-    return;
+    next(error);
   }
 };
 
 export const UpdatePermissionController: RequestHandler = async (
   req: Request,
-  res: Response
+  res: Response,
+  next: NextFunction
 ) => {
   try {
-    const { id } = ValidateSchema(permissionParamsSchema, req.params);
-    const { route } = ValidateSchema(permissionBodySchema, req.body);
     const permissionModel = new PermissionModel(pool);
-    const permission = await updatePermissionService(permissionModel)(
-      id,
-      Array.isArray(route) ? route[0] : route
-    );
-    if (!permission) {
-      res.send({
-        code: 404,
-        message: "Permission not found",
-      });
-      return;
-    }
+    const permission = await updatePermissionService(permissionModel)(req.body);
     const filteredPermission = pickKey(permission, [
       "route",
       "created_at",
@@ -130,19 +114,19 @@ export const UpdatePermissionController: RequestHandler = async (
       message: "Permission updated successfully!",
     });
   } catch (error) {
-    res.send({ code: 500, message: (error as Error).message });
-    return;
+    next(error);
   }
 };
 
 export const DeletePermissionController: RequestHandler = async (
   req: Request,
-  res: Response
+  res: Response,
+  next: NextFunction
 ) => {
   try {
     const permissionModel = new PermissionModel(pool);
-    const { id } = ValidateSchema(permissionParamsSchema, req.params);
-    const permission = await deletePermissionService(permissionModel)(id);
+    const uuid = req.params.uuid;
+    const permission = await deletePermissionService(permissionModel)(uuid);
     if (!permission) {
       res.send({
         code: 404,

@@ -6,11 +6,42 @@ import {
   GetPermissionByIdController,
   UpdatePermissionController,
 } from "../controllers/permissionControllers.js";
+import { authMiddleware } from "../middleware/authMiddleware.js";
+import { ValidateSchema } from "../utils/validateSchema.js";
+import {
+  permissionBodySchema,
+  permissionParamsSchema,
+  permissionUpdatePayloadSchema,
+} from "../schemas/permissionSchema/permission.schema.js";
 
 export const PermissionRouter = Router();
 
-PermissionRouter.post("/", CreatePermissionController);
+PermissionRouter.post(
+  "/",
+  ValidateSchema(permissionBodySchema, "body"),
+  authMiddleware,
+  CreatePermissionController
+);
+
 PermissionRouter.get("/", GetAllPermissionsController);
-PermissionRouter.get("/:id", GetPermissionByIdController);
-PermissionRouter.put("/:id", UpdatePermissionController);
-PermissionRouter.delete("/:id", DeletePermissionController);
+
+PermissionRouter.get(
+  "/:uuid",
+  ValidateSchema(permissionParamsSchema, "params"),
+  authMiddleware,
+  GetPermissionByIdController
+);
+
+PermissionRouter.put(
+  "/:uuid",
+  ValidateSchema(permissionUpdatePayloadSchema, "body"),
+  authMiddleware,
+  UpdatePermissionController
+);
+
+PermissionRouter.delete(
+  "/:uuid",
+  ValidateSchema(permissionParamsSchema, "params"),
+  authMiddleware,
+  DeletePermissionController
+);

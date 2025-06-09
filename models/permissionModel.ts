@@ -1,65 +1,53 @@
+import {
+  PermissionBodySchema,
+  PermissionUpdatePayloadSchema,
+} from "../schemas/permissionSchema/permission.schema.js";
+import { Permission } from "../schemas/permissionSchema/permission.type.js";
 import { BaseModel } from "./baseModel.js";
 
-interface Permission {
-  id: number;
-  route: string;
-  created_at?: Date;
-  updated_at?: Date;
-  deleted_at?: Date | null;
-}
-
 export class PermissionModel extends BaseModel {
-  async createPermission(routes: string[]) {
-    try {
-      const query = "INSERT INTO permissions (route) VALUES ($1) RETURNING *";
-      const result = await this._db.query(query, [routes]);
-      return result.rows[0];
-    } catch (error) {
-      throw new Error((error as Error).message);
-    }
+  async createPermission(payload: PermissionBodySchema) {
+    const query = `
+      INSERT INTO permissions (route, permission_name)
+      VALUES ($1::text[], $2)
+      RETURNING *
+    `;
+    const result = await this._db.query(query, [
+      payload.route,
+      payload.permission_name,
+    ]);
+    return result.rows[0] as Permission;
   }
 
   async getAllPermissions() {
-    try {
-      const query = "SELECT * FROM permissions WHERE deleted_at IS NULL";
-      const result = await this._db.query(query);
-      return result.rows;
-    } catch (error) {
-      throw new Error((error as Error).message);
-    }
+    const query = "SELECT * FROM permissions WHERE deleted_at IS NULL";
+    const result = await this._db.query(query);
+    return result.rows as Permission[];
   }
 
-  async getPermissionById(id: number) {
-    try {
-      const query = "SELECT * FROM permissions WHERE id = $1";
-      const result = await this._db.query(query, [id]);
-      return result.rows[0] || null;
-    } catch (error) {
-      throw new Error((error as Error).message);
-    }
+  async getPermissionById(uuid: string) {
+    const query =
+      "SELECT * FROM permissions WHERE uuid = $1 and deleted_at IS NULL";
+    const result = await this._db.query(query, [uuid]);
+    return result.rows[0] as Permission;
   }
 
-  async updatePermission(
-    id: number,
-    route: string
-  ): Promise<Permission | null> {
-    try {
-      const query =
-        "UPDATE permissions SET route = $1 WHERE id = $2 RETURNING *";
-      const result = await this._db.query(query, [route, id]);
-      return result.rows[0] || null;
-    } catch (error) {
-      throw new Error((error as Error).message);
-    }
+  async updatePermission(payload: PermissionUpdatePayloadSchema) {
+    const { route, uuid } = payload;
+    const query = `
+      UPDATE permissions
+      SET route = $1
+      WHERE uuid = $2
+      RETURNING *
+    `;
+    const result = await this._db.query(query, [route, uuid]);
+    return result.rows[0] ?? null;
   }
 
-  async deletePermission(id: number): Promise<Permission | null> {
-    try {
-      const query = "DELETE FROM permissions WHERE id = $1 RETURNING *";
-      const result = await this._db.query(query, [id]);
-      return result.rows[0] || null;
-    } catch (error) {
-      throw new Error((error as Error).message);
-    }
+  async deletePermission(uuid: string) {
+    const query =
+      "update permissions SET deleted_at = NOW() WHERE uuid = $1 RETURNING *";
+    const result = await this._db.query(query, [uuid]);
+    return result.rows[0] || null;
   }
 }

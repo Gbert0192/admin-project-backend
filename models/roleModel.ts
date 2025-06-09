@@ -20,7 +20,6 @@ export const createRole = async (payload: CreateRolePayload) => {
   );
   return result.rows[0];
 };
-
 export const getRolesWithPermissions = async () => {
   const query =
     "SELECT r.id, r.role_name, p.id as permission_id, p.route FROM roles r LEFT JOIN permissions p ON r.permission_id = p.id WHERE r.deleted_at IS NULL";
