@@ -7,6 +7,7 @@ import { AuthRouter } from "./routes/authRoutes.js";
 import { PermissionRouter } from "./routes/permissionRoutes.js";
 import UserRouter from "./routes/userRoutes.js";
 import { apiLimiter } from "./middleware/rateLimiter.js";
+import { RoleRouter } from "./routes/roleRoutes.js";
 
 dotenv.config();
 
@@ -24,7 +25,7 @@ app.use(apiLimiter);
 app.use("/auth", AuthRouter);
 app.use("/user", UserRouter);
 app.use("/permissions", PermissionRouter);
-// app.use("/roles", RoleRouter);
+app.use("/roles", RoleRouter);
 
 app.use(errorHandler);
 

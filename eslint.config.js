@@ -22,7 +22,6 @@ export default tseslint.config(
       "no-console": "warn",
       "no-unused-vars": "warn",
       semi: ["warn", "always"],
-      quotes: ["warn", "double"],
       indent: ["warn", 2],
     },
   },
@@ -43,8 +42,6 @@ export default tseslint.config(
     rules: {
       "no-console": "warn",
       semi: ["warn", "always"],
-      quotes: ["warn", "double"],
-
       "@typescript-eslint/no-unused-vars": "warn",
       "@typescript-eslint/no-empty-function": "warn",
       "@typescript-eslint/no-var-requires": "warn",

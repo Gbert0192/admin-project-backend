@@ -1,36 +1,64 @@
-import pool from "../config/database.js";
 import {
   CreateRolePayload,
   UpdateRolePermissionPayload,
 } from "../schemas/roleSchema/role.schema.js";
 import { Role } from "../schemas/roleSchema/role.type.js";
+import { BaseModel } from "./baseModel.js";
 
-export const findRoleByName = async (role_name: string) => {
-  const result = await pool.query(
-    "SELECT id FROM roles WHERE role_name = $1 and deleted_at is null",
-    [role_name]
-  );
-  return result.rows[0].id as number;
-};
+export class RoleModel extends BaseModel {
+  async findRoleByName(role_name: string) {
+    const result = await this._db.query(
+      `SELECT id FROM roles WHERE role_name = $1 AND deleted_at IS NULL`,
+      [role_name]
+    );
+    return result.rows[0] as Role;
+  }
 
-export const createRole = async (payload: CreateRolePayload) => {
-  const result = await pool.query(
-    "INSERT INTO roles (role_name, permissions) VALUES ($1, $2) RETURNING *",
-    [payload.role_name, payload.permission]
-  );
-  return result.rows[0];
-};
-export const getRolesWithPermissions = async () => {
-  const query =
-    "SELECT r.id, r.role_name, p.id as permission_id, p.route FROM roles r LEFT JOIN permissions p ON r.permission_id = p.id WHERE r.deleted_at IS NULL";
-  const result = await pool.query(query);
-  return result.rows as Role[];
-};
+  async createRole(payload: CreateRolePayload) {
+    const query = `
+      INSERT INTO roles (role_name, permission_id)
+      VALUES ($1, $2::bigint[])
+      RETURNING *
+    `;
+    const result = await this._db.query(query, [
+      payload.role_name,
+      payload.permissions,
+    ]);
+    return result.rows[0] as Role;
+  }
 
-export const updateRolePermission = async (
-  payload: UpdateRolePermissionPayload
-) => {
-  const query = "UPDATE roles SET permission = $1 WHERE id = $2 RETURNING *";
-  const result = await pool.query(query, [payload.id, payload.permission_id]);
-  return result.rows[0] as Role;
-};
+  async getRoles() {
+    const query = `
+    select * from roles where deleted_at is null
+    `;
+    const result = await this._db.query(query);
+    return result.rows as Role[];
+  }
+
+  async updateRolePermission(payload: UpdateRolePermissionPayload) {
+    const { permission_id, role_name, uuid } = payload;
+    const query = `
+      UPDATE roles
+      SET permission_id = $2::bigint[], role_name = $1
+      WHERE uuid = $3
+      RETURNING *
+    `;
+    const result = await this._db.query(query, [
+      role_name,
+      permission_id,
+      uuid,
+    ]);
+    return result.rows[0] as Role;
+  }
+
+  async deleteRole(uuid: string) {
+    const query = `
+      UPDATE roles
+      SET deleted_at = NOW()
+      WHERE id = $1
+      RETURNING *
+    `;
+    const result = await this._db.query(query, [uuid]);
+    return result.rows[0];
+  }
+}

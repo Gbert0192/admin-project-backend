@@ -18,8 +18,7 @@ export const CreatePermissionController = async (
 ) => {
   try {
     const permissionModel = new PermissionModel(pool);
-    const route = req.body.route;
-    const permission = await createPermissionService(permissionModel)(route);
+    const permission = await createPermissionService(permissionModel)(req.body);
     const filteredPermission = pickKey(permission, [
       "route",
       "created_at",
@@ -147,10 +146,6 @@ export const DeletePermissionController: RequestHandler = async (
     });
     return;
   } catch (error) {
-    res.send({
-      code: 500,
-      message: (error as Error).message,
-    });
-    return;
+    next(error);
   }
 };
