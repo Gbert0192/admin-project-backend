@@ -22,6 +22,7 @@ export const CreatePermissionController = async (
     const permission = await createPermissionService(permissionModel)(route);
     const filteredPermission = pickKey(permission, [
       "route",
+      "permission_name",
       "created_at",
       "updated_at",
       "deleted_at",
@@ -47,6 +48,7 @@ export const GetAllPermissionsController = async (
     const filteredPermissions = permissions.map((permission) => {
       return pickKey(permission, [
         "route",
+        "permission_name",
         "created_at",
         "updated_at",
         "deleted_at",
@@ -80,6 +82,7 @@ export const GetPermissionByIdController: RequestHandler = async (
     }
     const filteredPermission = pickKey(permission, [
       "route",
+      "permission_name",
       "created_at",
       "updated_at",
       "deleted_at",
@@ -104,6 +107,7 @@ export const UpdatePermissionController: RequestHandler = async (
     const permission = await updatePermissionService(permissionModel)(req.body);
     const filteredPermission = pickKey(permission, [
       "route",
+      "permission_name",
       "created_at",
       "updated_at",
       "deleted_at",
@@ -136,6 +140,7 @@ export const DeletePermissionController: RequestHandler = async (
     }
     const filteredPermission = pickKey(permission, [
       "route",
+      "permission_name",
       "created_at",
       "updated_at",
       "deleted_at",
