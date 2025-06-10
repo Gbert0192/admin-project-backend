@@ -7,7 +7,7 @@ import { authMiddleware } from "../middleware/authMiddleware.js";
 
 export const UserRouter = Router();
 
-UserRouter.get("/", authMiddleware, GetUserController);
+UserRouter.get("/", GetUserController);
 UserRouter.get("/:student_id", authMiddleware, GetUserControllerByStudentId);
 
 export default UserRouter;
