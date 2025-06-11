@@ -8,9 +8,7 @@ import { BaseModel } from "./baseModel.js";
 export class UserModel extends BaseModel {
   async getUsers(options: PaginationInterfaceHelper) {
     const { limit = 10, page = 1, ...filters } = options;
-
     const offset = (page - 1) * limit;
-    console.log(filters);
 
     const { conditions, values } = createQueryParams(filters);
 
