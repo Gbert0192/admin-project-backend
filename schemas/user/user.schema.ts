@@ -1,8 +1,12 @@
 import { z } from "zod";
 
-export const getUserIdSchema = z.object({
-  id: z.coerce.number().int().positive(),
-});
+export const getUserIdSchema = z
+  .object({
+    student_id: z.coerce.number().int().positive().optional(),
+    limit: z.coerce.number().int().positive().optional(),
+    page: z.coerce.number().int().positive().optional(),
+  })
+  .passthrough();
 
 export const deleteUserSchema = z.object({
   id: z.coerce.number().int().positive(),

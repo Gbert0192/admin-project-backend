@@ -40,6 +40,7 @@ export default tseslint.config(
       },
     },
     rules: {
+      allowObjectTypes: true,
       "no-console": "warn",
       semi: ["warn", "always"],
       "@typescript-eslint/no-unused-vars": "warn",

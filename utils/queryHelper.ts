@@ -31,32 +31,8 @@ export function createQueryParams(
   return { conditions, values };
 }
 
-// async get(q: GetUserQuery) {
-//   try {
-//     const { limit, page, ...otherQuery } = q;
-//     const offset = (page - 1) * limit;
-
-//     const { conditions, values } = createQueryParams(otherQuery);
-
-//     const query = `
-//       SELECT *, COUNT(*) OVER () AS total FROM users
-//       WHERE deleted_at IS NULL AND verify_status = 'Approved' ${conditions}
-//       ORDER BY created_at DESC
-//       LIMIT $${values.length + 1} OFFSET $${values.length + 2};
-//     `;
-
-//     const res = await this._db.query(query, [...values, limit, offset]);
-//     const rows = res.rows as User & { total: number }[];
-//     const total = rows[0]?.total ?? 0;
-
-//     return {
-//       data: res.rows as User[],
-//       total: Number(total),
-//       limit: Number(limit),
-//       page: Number(page),
-//     };
-//   } catch (error) {
-//     logger.error("Error getting users:", error);
-//     errorFormatter("INTERNAL_SERVER_ERROR", "Internal Server Error");
-//   }
-// }
+export interface PaginationInterfaceHelper {
+  page?: number;
+  limit?: number;
+  [key: string]: unknown;
+}

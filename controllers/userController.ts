@@ -6,16 +6,14 @@ import {
 } from "../services/userServices.js";
 import { Request, Response } from "express";
 import { pickKey } from "../utils/queryHelper.js";
+import { GetUserIdSchema } from "../schemas/user/user.schema.js";
 
 export const GetUserController = async (req: Request, res: Response) => {
-  const page = parseInt(req.query.page as string) || 1;
-  const limit = parseInt(req.query.limit as string) || 10;
-  const offset = (page - 1) * limit;
-
   const userModel = new UserModel(pool);
-  const { users, total } = await getUserService(userModel)(limit, offset);
+  console.log(req.query);
+  const { data, total, limit } = await getUserService(userModel)(req.query);
 
-  const filteredUser = users.data.map((user) =>
+  const filteredUser = data.map((user) =>
     pickKey(user, [
       "uuid",
       "name",
