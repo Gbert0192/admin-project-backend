@@ -8,6 +8,7 @@ import { PermissionRouter } from "./routes/permissionRoutes.js";
 import UserRouter from "./routes/userRoutes.js";
 import { apiLimiter } from "./middleware/rateLimiter.js";
 import { RoleRouter } from "./routes/roleRoutes.js";
+import { authMiddleware } from "./middleware/authMiddleware.js";
 
 dotenv.config();
 
@@ -23,6 +24,9 @@ app.set("trust proxy", 1);
 app.use(apiLimiter);
 
 app.use("/auth", AuthRouter);
+
+app.use(authMiddleware);
+
 app.use("/user", UserRouter);
 app.use("/permissions", PermissionRouter);
 app.use("/roles", RoleRouter);

@@ -3,10 +3,9 @@ import { z } from "zod";
 export const permissionBodySchema = z.object({
   permission_name: z.string().min(1, "Permission name is required"),
   route: z.array(
-    z
-      .string()
-      .min(1, "Route is required")
-      .startsWith("/", "Route must start with /")
+    z.number()
+    // .min(1, "Route is required")
+    // .startsWith("/", "Route must start with /")
   ),
 });
 
