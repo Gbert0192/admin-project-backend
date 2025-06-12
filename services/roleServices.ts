@@ -19,9 +19,6 @@ export const createRoleService =
 export const getRoleService =
   (roleModel: RoleModel) => async (query: PaginationInterfaceHelper) => {
     const roles = await roleModel.getRoles(query);
-    if (!roles || roles.data.length === 0) {
-      throw new AppError("No roles found", 404);
-    }
     return {
       data: roles.data,
       total: roles.total,
