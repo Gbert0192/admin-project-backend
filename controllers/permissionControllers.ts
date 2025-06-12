@@ -18,8 +18,7 @@ export const CreatePermissionController = async (
 ) => {
   try {
     const permissionModel = new PermissionModel(pool);
-    const route = req.body.route;
-    const permission = await createPermissionService(permissionModel)(route);
+    const permission = await createPermissionService(permissionModel)(req.body);
     const filteredPermission = pickKey(permission, [
       "route",
       "permission_name",

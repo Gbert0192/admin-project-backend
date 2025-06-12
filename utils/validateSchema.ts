@@ -1,23 +1,28 @@
-import { z, AnyZodObject } from "zod";
-import { Request, Response, NextFunction } from "express";
+// file: middleware/validateSchema.middleware.ts
 
-type ValidationSource = "body" | "params" | "query";
+import { Request, Response, NextFunction } from "express";
+import { AnyZodObject, ZodError } from "zod";
 
 export const ValidateSchema =
-  (schema: AnyZodObject, source: ValidationSource) =>
-  (req: Request, res: Response, next: NextFunction) => {
+  (schema: AnyZodObject, location: "body" | "query" | "params") =>
+  async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-      req[source] = schema.parse(req[source]);
+      const validatedData = await schema.parseAsync(req[location]);
+      if (location === "body") {
+        req.body = validatedData;
+      } else {
+        res.locals.cleaned = validatedData;
+      }
+
       next();
     } catch (error) {
-      if (error instanceof z.ZodError) {
+      if (error instanceof ZodError) {
         res.status(400).json({
-          message: `Invalid request ${source}`,
+          message: "Input tidak valid",
           errors: error.flatten().fieldErrors,
         });
         return;
       }
-
-      res.status(500).json({ message: "Internal Server Error" });
+      next(error);
     }
   };

@@ -9,22 +9,31 @@ import { pickKey } from "../utils/queryHelper.js";
 
 export const GetUserController = async (req: Request, res: Response) => {
   const userModel = new UserModel(pool);
-  const user = await getUserService(userModel)();
+  const { data, total, limit } = await getUserService(userModel)(
+    res.locals.cleaned
+  );
 
-  const filteredUser = user.map((user) =>
+  const filteredUser = data.map((user) =>
     pickKey(user, [
       "uuid",
       "name",
       "student_id",
-      "role_id",
       "created_at",
       "updated_at",
       "deleted_at",
     ])
   );
-  res.send({ data: filteredUser, code: 200, message: "Get User Successfully" });
-};
 
+  const totalPages = Math.ceil(total / limit);
+
+  res.send({
+    data: filteredUser,
+    code: 200,
+    message: "Get User Successfully",
+    total: total,
+    totalPages,
+  });
+};
 export const GetUserControllerByStudentId = async (
   req: Request,
   res: Response
