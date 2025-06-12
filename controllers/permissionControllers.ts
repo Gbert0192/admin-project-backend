@@ -46,6 +46,7 @@ export const GetAllPermissionsController = async (
     const filteredPermissions = permissions.map((permission) => {
       return pickKey(permission, [
         "route",
+        "permission_name",
         "created_at",
         "updated_at",
         "deleted_at",

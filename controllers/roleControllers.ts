@@ -43,9 +43,9 @@ export const GetRoleController = async (
 ) => {
   try {
     const roleModel = new RoleModel(pool);
-    const role = await getRoleService(roleModel)();
-    const filteredRole = role.map((item) =>
-      pickKey(item, ["role_name", "created_at", "permission_id"])
+    const role = await getRoleService(roleModel)(res.locals.cleaned);
+    const filteredRole = role.data.map((item) =>
+      pickKey(item, ["role_name", "created_at", "permissions"])
     );
     res.send({
       data: filteredRole,

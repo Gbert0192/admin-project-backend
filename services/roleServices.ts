@@ -5,6 +5,7 @@ import {
   UpdateRolePermissionPayload,
 } from "../schemas/roleSchema/role.schema.js";
 import { Role } from "../schemas/roleSchema/role.type.js";
+import { PaginationInterfaceHelper } from "../utils/queryHelper.js";
 
 export const createRoleService =
   (roleModel: RoleModel) => async (payload: CreateRolePayload) => {
@@ -15,13 +16,18 @@ export const createRoleService =
     return role;
   };
 
-export const getRoleService = (roleModel: RoleModel) => async () => {
-  const roles = await roleModel.getRoles();
-  if (!roles || roles.length === 0) {
-    throw new AppError("No roles found", 404);
-  }
-  return roles;
-};
+export const getRoleService =
+  (roleModel: RoleModel) => async (query: PaginationInterfaceHelper) => {
+    const roles = await roleModel.getRoles(query);
+    if (!roles || roles.data.length === 0) {
+      throw new AppError("No roles found", 404);
+    }
+    return {
+      data: roles.data,
+      total: roles.total,
+      limit: roles.limit,
+    };
+  };
 
 export const updateRolePermissionService =
   (roleModel: RoleModel) => async (payload: UpdateRolePermissionPayload) => {

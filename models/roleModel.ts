@@ -3,7 +3,22 @@ import {
   UpdateRolePermissionPayload,
 } from "../schemas/roleSchema/role.schema.js";
 import { Role } from "../schemas/roleSchema/role.type.js";
+import {
+  createQueryParams,
+  PaginationInterfaceHelper,
+} from "../utils/queryHelper.js";
 import { BaseModel } from "./baseModel.js";
+
+interface JoinedRolePermission {
+  route: string;
+  uuid: string;
+  permission_name: string;
+}
+
+interface RoleWithPermissions extends Role {
+  permissions: JoinedRolePermission[];
+  total: number;
+}
 
 export class RoleModel extends BaseModel {
   async findRoleByName(role_name: string) {
@@ -27,12 +42,40 @@ export class RoleModel extends BaseModel {
     return result.rows[0] as Role;
   }
 
-  async getRoles() {
+  async getRoles(q: PaginationInterfaceHelper) {
+    const { limit = 10, page = 1, ...filters } = q;
+    const offset = (page - 1) * limit;
+
+    const { conditions, values } = createQueryParams(filters);
+
     const query = `
-    select * from roles where deleted_at is null
+          SELECT 
+        r.*, 
+        COUNT(*) OVER() AS total,
+        json_agg(
+          json_build_object(
+            'id', p.id,
+            'route', p.route,
+            'uuid', p.uuid,
+            'permission_name', p.permission_name
+          )
+        ) AS permissions
+      FROM roles r
+      JOIN LATERAL unnest(r.permission_id) AS pid ON TRUE
+      LEFT JOIN permissions p ON p.id = pid
+      WHERE r.deleted_at IS NULL ${conditions}
+      GROUP BY r.id
+      ORDER BY r.created_at DESC
+      LIMIT $${values.length + 1} OFFSET $${values.length + 2}
     `;
-    const result = await this._db.query(query);
-    return result.rows as Role[];
+    const result = await this._db.query(query, [...values, limit, offset]);
+    const rows = result.rows as RoleWithPermissions[];
+    const total = rows[0]?.total ?? "0";
+    return {
+      data: rows,
+      total: Number(total),
+      limit: Number(limit ?? 0),
+    };
   }
 
   async updateRolePermission(payload: UpdateRolePermissionPayload) {

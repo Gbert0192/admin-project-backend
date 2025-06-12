@@ -15,7 +15,15 @@ export const deleteRolePayloadSchema = z.object({
   uuid: z.coerce.string(),
 });
 
+export const getRoleQuerySchema = z.object({
+  role_name: z.coerce.string().optional(),
+  limit: z.coerce.number().int().positive().optional(),
+  page: z.coerce.number().int().positive().optional(),
+});
+
 export type CreateRolePayload = z.infer<typeof createRolePayloadSchema>;
 export type UpdateRolePermissionPayload = z.infer<
   typeof updateRolePermissionPayloadSchema
 >;
+
+export type GetRoleQuerySchema = z.infer<typeof getRoleQuerySchema>;
