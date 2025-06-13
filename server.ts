@@ -28,8 +28,8 @@ app.use("/auth", AuthRouter);
 app.use(authMiddleware);
 
 app.use("/user", UserRouter);
-app.use("/permissions", PermissionRouter);
-app.use("/roles", RoleRouter);
+app.use("/permission", PermissionRouter);
+app.use("/role", RoleRouter);
 
 app.use(errorHandler);
 

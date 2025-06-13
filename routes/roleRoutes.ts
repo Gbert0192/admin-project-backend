@@ -3,6 +3,7 @@ import { ValidateSchema } from "../utils/validateSchema.js";
 import {
   createRolePayloadSchema,
   deleteRolePayloadSchema,
+  getRoleQuerySchema,
 } from "../schemas/roleSchema/role.schema.js";
 import {
   CreateRoleController,
@@ -19,7 +20,11 @@ RoleRouter.post(
   CreateRoleController
 );
 
-RoleRouter.get("/", GetRoleController);
+RoleRouter.get(
+  "/",
+  ValidateSchema(getRoleQuerySchema, "query"),
+  GetRoleController
+);
 RoleRouter.put("/", UpdateRolePermissionController);
 RoleRouter.delete(
   "/:uuid",
