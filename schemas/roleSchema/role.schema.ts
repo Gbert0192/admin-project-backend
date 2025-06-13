@@ -2,7 +2,13 @@ import { z } from "zod";
 
 export const createRolePayloadSchema = z.object({
   role_name: z.string().min(1, "Role name is required"),
-  permissions: z.array(z.number().int().positive()),
+  permissions: z.array(z.string()).min(1, "Permission is required"),
+});
+export const createRolePayloadQuery = z.object({
+  role_name: z.string().min(1, "Role name is required"),
+  permissions: z
+    .array(z.number().int().positive())
+    .min(1, "Permission is required"),
 });
 
 export const updateRolePermissionPayloadSchema = z.object({
@@ -21,7 +27,8 @@ export const getRoleQuerySchema = z.object({
   page: z.coerce.number().int().positive().optional(),
 });
 
-export type CreateRolePayload = z.infer<typeof createRolePayloadSchema>;
+export type CreateRoleQuery = z.infer<typeof createRolePayloadQuery>;
+export type CreateRolePayloaSchema = z.infer<typeof createRolePayloadSchema>;
 export type UpdateRolePermissionPayload = z.infer<
   typeof updateRolePermissionPayloadSchema
 >;

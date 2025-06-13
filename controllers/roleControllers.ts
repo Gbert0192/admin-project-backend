@@ -9,6 +9,7 @@ import {
 import { createTransaction } from "../config/transaction.js";
 import pool from "../config/database.js";
 import { pickKey } from "../utils/queryHelper.js";
+import { PermissionModel } from "../models/permissionModel.js";
 
 export const CreateRoleController = async (
   req: Request,
@@ -18,7 +19,10 @@ export const CreateRoleController = async (
   try {
     await createTransaction(pool)(async (db) => {
       const roleModel = new RoleModel(db);
-      const role = await createRoleService(roleModel)(req.body);
+      const permissionModel = new PermissionModel(db);
+      const role = await createRoleService({ roleModel, permissionModel })(
+        req.body
+      );
       const filteredRole = pickKey(role, [
         "role_name",
         "uuid",

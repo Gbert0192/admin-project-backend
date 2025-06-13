@@ -1,5 +1,5 @@
 import {
-  CreateRolePayload,
+  CreateRoleQuery,
   UpdateRolePermissionPayload,
 } from "../schemas/roleSchema/role.schema.js";
 import { Role } from "../schemas/roleSchema/role.type.js";
@@ -29,7 +29,7 @@ export class RoleModel extends BaseModel {
     return result.rows[0] as Role;
   }
 
-  async createRole(payload: CreateRolePayload) {
+  async createRole(payload: CreateRoleQuery) {
     const query = `
       INSERT INTO roles (role_name, permission_id)
       VALUES ($1, $2::bigint[])
@@ -68,6 +68,7 @@ export class RoleModel extends BaseModel {
       ORDER BY r.created_at DESC
       LIMIT $${values.length + 1} OFFSET $${values.length + 2}
     `;
+
     const result = await this._db.query(query, [...values, limit, offset]);
     const rows = result.rows as RoleWithPermissions[];
     const total = rows[0]?.total ?? "0";

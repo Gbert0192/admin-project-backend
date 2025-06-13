@@ -1,15 +1,27 @@
 import { AppError } from "../middleware/errorMiddleware.js";
+import { PermissionModel } from "../models/permissionModel.js";
 import { RoleModel } from "../models/roleModel.js";
 import {
-  CreateRolePayload,
+  CreateRolePayloaSchema,
   UpdateRolePermissionPayload,
 } from "../schemas/roleSchema/role.schema.js";
 import { Role } from "../schemas/roleSchema/role.type.js";
 import { PaginationInterfaceHelper } from "../utils/queryHelper.js";
 
 export const createRoleService =
-  (roleModel: RoleModel) => async (payload: CreateRolePayload) => {
-    const role = await roleModel.createRole(payload);
+  (model: { roleModel: RoleModel; permissionModel: PermissionModel }) =>
+  async (payload: CreateRolePayloaSchema) => {
+    const { permissionModel, roleModel } = model;
+    const permissions_id = await permissionModel.getIdByUuidBulk(
+      payload.permissions
+    );
+    if (!permissions_id) {
+      throw new AppError("Permission not found", 404);
+    }
+    const role = await roleModel.createRole({
+      ...payload,
+      permissions: permissions_id,
+    });
     if (!role) {
       throw new AppError("Failed to create role", 401);
     }
