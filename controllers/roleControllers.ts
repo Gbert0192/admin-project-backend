@@ -49,7 +49,7 @@ export const GetRoleController = async (
     const roleModel = new RoleModel(pool);
     const role = await getRoleService(roleModel)(res.locals.cleaned);
     const filteredRole = role.data.map((item) =>
-      pickKey(item, ["role_name", "created_at", "permissions"])
+      pickKey(item, ["role_name", "created_at", "permissions", "uuid"])
     );
     res.send({
       data: filteredRole,
@@ -69,12 +69,19 @@ export const UpdateRolePermissionController = async (
   try {
     await createTransaction(pool)(async (db) => {
       const roleModel = new RoleModel(db);
-      const role = await updateRolePermissionService(roleModel)(req.body);
+      const permissionModel = new PermissionModel(db);
+
+      const role = await updateRolePermissionService({
+        roleModel,
+        permissionModel,
+      })(req.body);
       const filteredRole = pickKey(role, [
         "role_name",
         "uuid",
         "permission_id",
         "updated_at",
+        "created_at",
+        "deleted_at",
       ]);
       res.send({
         data: filteredRole,
@@ -94,7 +101,7 @@ export const DeleteRoleController = async (
 ) => {
   try {
     const roleModel = new RoleModel(pool);
-    const role = await deleteRoleService(roleModel)(req.params.uuid);
+    const role = await deleteRoleService(roleModel)(res.locals.cleaned.uuid);
     res.send({
       data: pickKey(role, ["role_name", "uuid", "deleted_at"]),
       code: 200,

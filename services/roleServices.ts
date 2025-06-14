@@ -39,8 +39,16 @@ export const getRoleService =
   };
 
 export const updateRolePermissionService =
-  (roleModel: RoleModel) => async (payload: UpdateRolePermissionPayload) => {
-    const updatedRole = await roleModel.updateRolePermission(payload);
+  (model: { roleModel: RoleModel; permissionModel: PermissionModel }) =>
+  async (payload: UpdateRolePermissionPayload) => {
+    const { permissionModel, roleModel } = model;
+    const permissionId = await permissionModel.getIdByUuidBulk(
+      payload.permissions
+    );
+    const updatedRole = await roleModel.updateRolePermission({
+      ...payload,
+      permissions: permissionId,
+    });
     if (!updatedRole) {
       throw new AppError("Failed to update role permission", 404);
     }

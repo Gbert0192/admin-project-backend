@@ -18,7 +18,7 @@ export const ValidateSchema =
     } catch (error) {
       if (error instanceof ZodError) {
         res.status(400).json({
-          message: "Input tidak valid",
+          message: "Unvalid request data",
           errors: error.flatten().fieldErrors,
         });
         return;
