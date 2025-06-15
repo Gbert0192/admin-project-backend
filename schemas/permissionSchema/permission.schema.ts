@@ -22,8 +22,8 @@ export const permissionUpdatePayloadSchema = z.object({
 });
 
 export const permissionQuerySchema = z.object({
-  page: z.coerce.number().min(1).optional().default(1),
-  limit: z.coerce.number().min(1).max(100).optional().default(10),
+  limit: z.coerce.number().int().positive().optional(),
+  page: z.coerce.number().int().positive().optional(),
   route: z.string().optional(),
   permission_name: z.string().optional(),
 });
