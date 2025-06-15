@@ -22,8 +22,16 @@ export const permissionUpdatePayloadSchema = z.object({
     .startsWith("/", "Route must start with /"),
 });
 
+export const permissionQuerySchema = z.object({
+  limit: z.coerce.number().int().positive().optional(),
+  page: z.coerce.number().int().positive().optional(),
+  route: z.string().optional(),
+  permission_name: z.string().optional(),
+});
+
 export type PermissionBodySchema = z.infer<typeof permissionBodySchema>;
 export type PermissionParamsSchema = z.infer<typeof permissionParamsSchema>;
+export type PermissionQuerySchema = z.infer<typeof permissionQuerySchema>;
 
 export type PermissionUpdatePayloadSchema = z.infer<
   typeof permissionUpdatePayloadSchema

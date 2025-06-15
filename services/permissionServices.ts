@@ -4,6 +4,7 @@ import {
   PermissionBodySchema,
   PermissionUpdatePayloadSchema,
 } from "../schemas/permissionSchema/permission.schema.js";
+import { PaginationInterfaceHelper } from "../utils/queryHelper.js";
 
 export const createPermissionService =
   (permissionModel: PermissionModel) =>
@@ -16,12 +17,16 @@ export const createPermissionService =
   };
 
 export const getAllPermissionsService =
-  (permissionModel: PermissionModel) => async () => {
-    const permissions = await permissionModel.getAllPermissions();
-    if (!permissions || permissions.length === 0) {
-      throw new AppError("No Permissions found", 404);
+  (permissionModel: PermissionModel) => async (query: PaginationInterfaceHelper) => {
+    const permissions = await permissionModel.getAllPermissions(query);
+    if (!permissions) {
+      throw new AppError("Failed to get permissions", 401);
     }
-    return permissions;
+    return {
+      data: permissions.data,
+      total: permissions.total,
+      limit: permissions.limit,
+    };
   };
 
 export const getPermissionByIdService =
@@ -38,7 +43,7 @@ export const updatePermissionService =
   async (payload: PermissionUpdatePayloadSchema) => {
     const permission = await permissionModel.updatePermission(payload);
     if (!permission) {
-      throw new AppError("Permission not found", 404);
+      throw new AppError("Failed to update permission", 401);
     }
     return permission;
   };

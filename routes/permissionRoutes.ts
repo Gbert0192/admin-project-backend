@@ -9,6 +9,7 @@ import {
 import {
   permissionBodySchema,
   permissionParamsSchema,
+  permissionQuerySchema,
   permissionUpdatePayloadSchema,
 } from "../schemas/permissionSchema/permission.schema.js";
 import { ValidateSchema } from "../utils/validateSchema.js";
@@ -21,7 +22,7 @@ PermissionRouter.post(
   CreatePermissionController
 );
 
-PermissionRouter.get("/", GetAllPermissionsController);
+PermissionRouter.get("/",  ValidateSchema(permissionQuerySchema, "query"), GetAllPermissionsController);
 
 PermissionRouter.get(
   "/:uuid",
