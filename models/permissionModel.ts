@@ -8,13 +8,14 @@ import { BaseModel } from "./baseModel.js";
 export class PermissionModel extends BaseModel {
   async createPermission(payload: PermissionBodySchema) {
     const query = `
-      INSERT INTO permissions (route, permission_name)
-      VALUES ($1, $2)
+      INSERT INTO permissions (route, permission_name, method)
+      VALUES ($1, $2, $3)
       RETURNING *
     `;
     const result = await this._db.query(query, [
       payload.route,
       payload.permission_name,
+      payload.method,
     ]);
     return result.rows[0] as Permission;
   }

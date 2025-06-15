@@ -6,6 +6,7 @@ import {
   loginUserService,
   RegisterUserService,
 } from "../services/authServices.js";
+import { RoleModel } from "../models/roleModel.js";
 
 export const LoginController = async (
   req: Request,
@@ -33,7 +34,10 @@ export const RegisterController = async (
   try {
     await createTransaction(pool)(async (db) => {
       const authModel = new AuthModel(db);
-      const user = await RegisterUserService(authModel)(req.body);
+      const roleModel = new RoleModel(db);
+      const user = await RegisterUserService({ authModel, roleModel })(
+        req.body
+      );
       res.send({ data: user, code: 201, message: "Registration Successful" });
     });
   } catch (error) {

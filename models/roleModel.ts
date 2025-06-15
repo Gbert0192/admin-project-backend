@@ -25,7 +25,7 @@ interface RoleWithPermissions extends Role {
 export class RoleModel extends BaseModel {
   async findRoleByName(role_name: string) {
     const result = await this._db.query(
-      `SELECT id FROM roles WHERE role_name = $1 AND deleted_at IS NULL`,
+      `SELECT * FROM roles WHERE role_name = $1 AND deleted_at IS NULL`,
       [role_name]
     );
     return result.rows[0] as Role;

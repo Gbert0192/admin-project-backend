@@ -47,14 +47,20 @@ export const GetRoleController = async (
 ) => {
   try {
     const roleModel = new RoleModel(pool);
-    const role = await getRoleService(roleModel)(res.locals.cleaned);
-    const filteredRole = role.data.map((item) =>
+    const { data, total, limit } = await getRoleService(roleModel)(
+      res.locals.cleaned
+    );
+    const filteredRole = data.map((item) =>
       pickKey(item, ["role_name", "created_at", "permissions", "uuid"])
     );
+    const totalPages = Math.ceil(total / limit);
+
     res.send({
       data: filteredRole,
       code: 200,
       message: "Roles fetched successfully!",
+      total: total,
+      totalPages,
     });
   } catch (error) {
     next(error);

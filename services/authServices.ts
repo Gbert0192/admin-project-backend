@@ -6,6 +6,7 @@ import {
 } from "../schemas/authSchema/auth.schema.js";
 import { generateToken } from "../utils/tokenHelper.js";
 import { AppError } from "../middleware/errorMiddleware.js";
+import { RoleModel } from "../models/roleModel.js";
 
 export const loginUserService =
   (authModel: AuthModel) => async (payload: LoginSchema) => {
@@ -32,14 +33,19 @@ export const loginUserService =
   };
 
 export const RegisterUserService =
-  (authModel: AuthModel) => async (payload: RegisterSchema) => {
+  (model: { authModel: AuthModel; roleModel: RoleModel }) =>
+  async (payload: RegisterSchema) => {
+    const { authModel, roleModel } = model;
     const existingUser = await authModel.findUser(payload.student_id);
     if (existingUser) {
       throw new AppError("User already Exists", 400);
     }
     const hashedPassword = await bcrypt.hash(payload.password, 10);
+    const roleId = await roleModel.findRoleByName(payload.role_name);
     const newUser = await authModel.createUser({
-      ...payload,
+      student_id: payload.student_id,
+      name: payload.name,
+      role_id: roleId.id,
       password: hashedPassword,
     });
     return { user: newUser, message: "Registration successful" };

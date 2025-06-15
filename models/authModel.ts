@@ -1,83 +1,25 @@
-import { RegisterSchema } from "../schemas/authSchema/auth.schema.js";
+import { RegisterQuerySchema } from "../schemas/authSchema/auth.schema.js";
 import { User } from "../schemas/user/user.type.js";
 import { BaseModel } from "./baseModel.js";
 
-// interface LoginPayload {
-//   student_id: string;
-//   password: string;
-// }
-
-// interface RegisterPayload {
-//   password: string;P
-//   [key: string]: any;
-// }
-
-// interface User {
-//   id: number;
-//   student_id: string;
-//   password: string;
-//   [key: string]: any;
-// }
-
-// export const handleLoginModel = async (
-//   payload: LoginPayload
-// ): Promise<Omit<User, "password">> => {
-//   try {
-//     const { student_id, password } = payload;
-//     const query = "SELECT * FROM users WHERE student_id = $1";
-//     const result = await pool.query(query, [student_id]);
-//     const user = result.rows[0] as User;
-//     if (!user) {
-//       throw new Error("User Not Found");
-//     }
-//     const isMatch = await bcrypt.compare(password, user.password);
-//     if (!isMatch) {
-//       throw new Error("Invalid Credentials");
-//     }
-//     const { password: _, ...userWithoutPassword } = user;
-//     return userWithoutPassword;
-//   } catch (error) {
-//     throw new Error((error as Error).message);
-//   }
-// };
-
-// export const handleRegisterModel = async (
-//   payload: RegisterPayload,
-//   db: Pool
-// ) => {
-//   try {
-//     const { password, ...others } = payload;
-//     const hashedPassword = await bcrypt.hash(password, 10);
-
-//     const newPayload = { ...others, password: hashedPassword };
-
-//     const values = Object.values(newPayload);
-//     const placeholder = values.map((_, i) => `$${i + 1}`).join(", ");
-//     const keys = Object.keys(newPayload).join(", ");
-
-//     const query = `INSERT INTO users (${keys}) VALUES (${placeholder}) RETURNING *`;
-//     const result = await db.query(query, values);
-
-//     return {
-//       data: result.rows[0],
-//       message: "User Created",
-//       status: 201,
-//     };
-//   } catch (error) {
-//     throw new AppError((error as Error).message, 400);
-//   }
-// };
-
 export class AuthModel extends BaseModel {
   async findUser(student_id: string) {
-    const query =
-      "SELECT * FROM users WHERE student_id = $1 and deleted_at is null";
+    const query = `
+      SELECT 
+        users.*, 
+        r.role_name as role_name
+      FROM users
+      JOIN roles r ON r.id = users.role_id
+      WHERE users.student_id = $1 AND users.deleted_at IS NULL and r.deleted_at IS NULL
+    `;
     const result = await this._db.query(query, [student_id]);
-    const user = result.rows[0] as User;
+    const user = result.rows[0] as User & {
+      role_name: string;
+    };
     return user;
   }
 
-  async createUser(payload: RegisterSchema) {
+  async createUser(payload: RegisterQuerySchema) {
     const value = Object.values(payload);
     const placeholder = value.map((_, i) => `$${i + 1}`).join(", ");
     const keys = Object.keys(payload).join(", ");

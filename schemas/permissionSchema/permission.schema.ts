@@ -6,6 +6,7 @@ export const permissionBodySchema = z.object({
     .string()
     .min(1, "Route is required")
     .startsWith("/", "Route must start with /"),
+  method: z.array(z.enum(["GET", "POST", "PUT", "DELETE"])),
 });
 
 export const permissionParamsSchema = z.object({
