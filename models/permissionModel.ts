@@ -56,6 +56,6 @@ export class PermissionModel extends BaseModel {
     const query = `SELECT id FROM permissions WHERE uuid IN (${placeholders})`;
     const result = await this._db.query(query, uuids);
     const ids = result.rows.map((row) => row.id);
-    return ids;
+    return ids as number[];
   }
 }

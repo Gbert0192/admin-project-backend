@@ -1,11 +1,13 @@
 import {
   CreateRoleQuery,
   UpdateRolePermissionPayload,
+  UpdateRolePermissionQuery,
 } from "../schemas/roleSchema/role.schema.js";
 import { Role } from "../schemas/roleSchema/role.type.js";
 import {
   createQueryParams,
   PaginationInterfaceHelper,
+  pickKey,
 } from "../utils/queryHelper.js";
 import { BaseModel } from "./baseModel.js";
 
@@ -54,7 +56,6 @@ export class RoleModel extends BaseModel {
         COUNT(*) OVER() AS total,
         json_agg(
           json_build_object(
-            'id', p.id,
             'route', p.route,
             'uuid', p.uuid,
             'permission_name', p.permission_name
@@ -79,19 +80,15 @@ export class RoleModel extends BaseModel {
     };
   }
 
-  async updateRolePermission(payload: UpdateRolePermissionPayload) {
-    const { permission_id, role_name, uuid } = payload;
+  async updateRolePermission(payload: UpdateRolePermissionQuery) {
+    const { permissions, role_name, uuid } = payload;
     const query = `
       UPDATE roles
       SET permission_id = $2::bigint[], role_name = $1
       WHERE uuid = $3
       RETURNING *
     `;
-    const result = await this._db.query(query, [
-      role_name,
-      permission_id,
-      uuid,
-    ]);
+    const result = await this._db.query(query, [role_name, permissions, uuid]);
     return result.rows[0] as Role;
   }
 
@@ -99,7 +96,7 @@ export class RoleModel extends BaseModel {
     const query = `
       UPDATE roles
       SET deleted_at = NOW()
-      WHERE id = $1
+      WHERE uuid = $1
       RETURNING *
     `;
     const result = await this._db.query(query, [uuid]);
