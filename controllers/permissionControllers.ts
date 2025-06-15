@@ -20,6 +20,7 @@ export const CreatePermissionController = async (
     const permissionModel = new PermissionModel(pool);
     const permission = await createPermissionService(permissionModel)(req.body);
     const filteredPermission = pickKey(permission, [
+      "uuid",
       "route",
       "permission_name",
       "created_at",
@@ -43,8 +44,9 @@ export const GetAllPermissionsController = async (
 ) => {
   try {
     const permissionModel = new PermissionModel(pool);
-    const permissions = await getAllPermissionsService(permissionModel)();
-    const filteredPermissions = permissions.map((permission) => {
+    const {data, total, limit} = await getAllPermissionsService(permissionModel)(res.locals.cleaned);
+
+    const filteredPermissions = data.map((permission) => {
       return pickKey(permission, [
         "uuid",
         "route",
@@ -54,10 +56,15 @@ export const GetAllPermissionsController = async (
         "deleted_at",
       ]);
     });
+
+    const totalPages = Math.ceil(total / limit);
+
     res.send({
       data: filteredPermissions,
       code: 200,
       message: "Get all permissions successfully!",
+      total: total,
+      totalPages,
     });
   } catch (error) {
     next(error);
@@ -81,6 +88,7 @@ export const GetPermissionByIdController: RequestHandler = async (
       return;
     }
     const filteredPermission = pickKey(permission, [
+      "uuid",
       "route",
       "permission_name",
       "created_at",
@@ -106,6 +114,7 @@ export const UpdatePermissionController: RequestHandler = async (
     const permissionModel = new PermissionModel(pool);
     const permission = await updatePermissionService(permissionModel)(req.body);
     const filteredPermission = pickKey(permission, [
+      "uuid",
       "route",
       "permission_name",
       "created_at",
@@ -139,6 +148,7 @@ export const DeletePermissionController: RequestHandler = async (
       return;
     }
     const filteredPermission = pickKey(permission, [
+      "uuid",
       "route",
       "permission_name",
       "created_at",
