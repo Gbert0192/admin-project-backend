@@ -17,7 +17,8 @@ export const createPermissionService =
   };
 
 export const getAllPermissionsService =
-  (permissionModel: PermissionModel) => async (query: PaginationInterfaceHelper) => {
+  (permissionModel: PermissionModel) =>
+  async (query: PaginationInterfaceHelper) => {
     const permissions = await permissionModel.getAllPermissions(query);
     if (!permissions) {
       throw new AppError("Failed to get permissions", 401);
@@ -55,4 +56,22 @@ export const deletePermissionService =
       throw new AppError("Permission not found", 404);
     }
     return permission;
+  };
+
+export const getPermissionWithOutMenuService =
+  (permissionModel: PermissionModel) => async () => {
+    const permissions = await permissionModel.getPermissionWithOutMenu();
+    if (!permissions) {
+      throw new AppError("Failed to get permissions", 401);
+    }
+    return permissions;
+  };
+
+export const getPermissionMenuService =
+  (permissionModel: PermissionModel) => async () => {
+    const permissions = await permissionModel.getPermissionMenu();
+    if (!permissions) {
+      throw new AppError("Failed to get permissions", 401);
+    }
+    return permissions;
   };

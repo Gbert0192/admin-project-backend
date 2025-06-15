@@ -9,7 +9,9 @@ import { AppError } from "../middleware/errorMiddleware.js";
 import { RoleModel } from "../models/roleModel.js";
 
 export const loginUserService =
-  (authModel: AuthModel) => async (payload: LoginSchema) => {
+  (model: { authModel: AuthModel; roleModel: RoleModel }) =>
+  async (payload: LoginSchema) => {
+    const { authModel, roleModel } = model;
     const user = await authModel.findUser(payload.student_id);
     if (!user) {
       throw new AppError("User not found", 404);
@@ -22,6 +24,10 @@ export const loginUserService =
     if (!isMatch) {
       throw new AppError("Invalid credentials", 401);
     }
+
+    const permission = await roleModel.getRolePermissionById(user.role_id);
+    const menus = await roleModel.getRoleMenusById(user.role_id);
+
     const token = await generateToken({
       user_name: user.name,
       user_id: user.uuid,
@@ -29,7 +35,12 @@ export const loginUserService =
       user_uuid: user.uuid,
     });
 
-    return { user, token, permission: [] };
+    return {
+      user,
+      token,
+      permission: permission.permissions,
+      menus: menus.menus,
+    };
   };
 
 export const RegisterUserService =

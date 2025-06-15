@@ -16,7 +16,8 @@ export const LoginController = async (
   try {
     await createTransaction(pool)(async (db) => {
       const authModel = new AuthModel(db);
-      const user = await loginUserService(authModel)(req.body);
+      const roleModel = new RoleModel(db);
+      const user = await loginUserService({ authModel, roleModel })(req.body);
       res
         .status(200)
         .json({ data: user, code: 200, message: "Login Successful" });

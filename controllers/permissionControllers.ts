@@ -1,14 +1,15 @@
+import { NextFunction, Request, RequestHandler, Response } from "express";
 import pool from "../config/database.js";
-import { NextFunction, RequestHandler } from "express";
 import { PermissionModel } from "../models/permissionModel.js";
 import {
   createPermissionService,
+  deletePermissionService,
   getAllPermissionsService,
   getPermissionByIdService,
+  getPermissionMenuService,
+  getPermissionWithOutMenuService,
   updatePermissionService,
-  deletePermissionService,
 } from "../services/permissionServices.js";
-import { Request, Response } from "express";
 import { pickKey } from "../utils/queryHelper.js";
 
 export const CreatePermissionController = async (
@@ -21,6 +22,7 @@ export const CreatePermissionController = async (
     const permission = await createPermissionService(permissionModel)(req.body);
     const filteredPermission = pickKey(permission, [
       "uuid",
+      "is_menu",
       "route",
       "method",
       "permission_name",
@@ -45,11 +47,14 @@ export const GetAllPermissionsController = async (
 ) => {
   try {
     const permissionModel = new PermissionModel(pool);
-    const {data, total, limit} = await getAllPermissionsService(permissionModel)(res.locals.cleaned);
+    const { data, total, limit } = await getAllPermissionsService(
+      permissionModel
+    )(res.locals.cleaned);
 
     const filteredPermissions = data.map((permission) => {
       return pickKey(permission, [
         "uuid",
+        "is_menu",
         "method",
         "route",
         "permission_name",
@@ -163,6 +168,70 @@ export const DeletePermissionController: RequestHandler = async (
       message: "Permission deleted successfully!",
     });
     return;
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const GetPermissionWithOutMenuController = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const permissionModel = new PermissionModel(pool);
+    const data = await getPermissionWithOutMenuService(permissionModel)();
+
+    const filteredPermissions = data.map((permission) => {
+      return pickKey(permission, [
+        "uuid",
+        "method",
+        "route",
+        "is_menu",
+        "permission_name",
+        "created_at",
+        "updated_at",
+        "deleted_at",
+      ]);
+    });
+
+    res.send({
+      data: filteredPermissions,
+      code: 200,
+      message: "Get all permissions successfully!",
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const GetPermissionMenuController = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const permissionModel = new PermissionModel(pool);
+    const data = await getPermissionMenuService(permissionModel)();
+
+    const filteredPermissions = data.map((permission) => {
+      return pickKey(permission, [
+        "uuid",
+        "method",
+        "route",
+        "is_menu",
+        "permission_name",
+        "created_at",
+        "updated_at",
+        "deleted_at",
+      ]);
+    });
+
+    res.send({
+      data: filteredPermissions,
+      code: 200,
+      message: "Get all permissions successfully!",
+    });
   } catch (error) {
     next(error);
   }

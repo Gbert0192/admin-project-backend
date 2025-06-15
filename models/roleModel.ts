@@ -1,13 +1,11 @@
 import {
   CreateRoleQuery,
-  UpdateRolePermissionPayload,
   UpdateRolePermissionQuery,
 } from "../schemas/roleSchema/role.schema.js";
 import { Role } from "../schemas/roleSchema/role.type.js";
 import {
   createQueryParams,
   PaginationInterfaceHelper,
-  pickKey,
 } from "../utils/queryHelper.js";
 import { BaseModel } from "./baseModel.js";
 
@@ -17,9 +15,27 @@ interface JoinedRolePermission {
   permission_name: string;
 }
 
+interface UserPermission {
+  route: string;
+  permission_name: string;
+  method: string[];
+}
+interface UserRoleWithPermission extends Role {
+  permissions: UserPermission[];
+}
+
 interface RoleWithPermissions extends Role {
   permissions: JoinedRolePermission[];
   total: number;
+}
+
+interface Menu {
+  route: string;
+  permission_name: string;
+}
+
+interface UserRoleWithMenus {
+  menus: Menu[];
 }
 
 export class RoleModel extends BaseModel {
@@ -58,6 +74,7 @@ export class RoleModel extends BaseModel {
           json_build_object(
             'route', p.route,
             'uuid', p.uuid,
+            'is_menu', p.is_menu,
             'permission_name', p.permission_name
           )
         ) AS permissions
@@ -101,5 +118,50 @@ export class RoleModel extends BaseModel {
     `;
     const result = await this._db.query(query, [uuid]);
     return result.rows[0];
+  }
+
+  async getRolePermissionById(id: number) {
+    const query = `
+    SELECT
+        r.*,
+        json_agg(
+          json_build_object(
+            'route', p.route,
+            'permission_name', p.permission_name,
+            'method', to_json(p.method)
+          )
+        ) AS permissions
+      FROM
+        roles r
+      LEFT JOIN
+        permissions p ON p.id = ANY(r.permission_id)
+      WHERE
+        r.id = $1
+      GROUP BY
+        r.id;
+    `;
+    const result = await this._db.query(query, [id]);
+    return result.rows[0] as UserRoleWithPermission;
+  }
+  async getRoleMenusById(id: number) {
+    const query = `
+      SELECT
+        json_agg(
+          json_build_object(
+            'route', p.route,
+            'permission_name', p.permission_name
+          )
+        ) FILTER (WHERE p.id IS NOT NULL) AS menus
+      FROM
+        roles r
+      LEFT JOIN
+        permissions p ON p.id = ANY(r.permission_id) AND p.is_menu = true
+      WHERE
+        r.id = $1
+      GROUP BY
+        r.id;
+    `;
+    const result = await this._db.query(query, [id]);
+    return result.rows[0] as UserRoleWithMenus;
   }
 }

@@ -1,12 +1,15 @@
 import { z } from "zod";
 
 export const permissionBodySchema = z.object({
-  permission_name: z.string().min(1, "Permission name is required"),
   route: z
     .string()
-    .min(1, "Route is required")
-    .startsWith("/", "Route must start with /"),
-  method: z.array(z.enum(["GET", "POST", "PUT", "DELETE"])),
+    .min(1, { message: "Route is required." })
+    .startsWith("/", { message: "Route must start with a '/'" }),
+  permission_name: z
+    .string()
+    .min(1, { message: "Permission name is required." }),
+  method: z.array(z.enum(["GET", "POST", "PUT", "DELETE"])).optional(),
+  is_menu: z.boolean(),
 });
 
 export const permissionParamsSchema = z.object({

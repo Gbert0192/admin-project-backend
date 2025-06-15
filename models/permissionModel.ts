@@ -3,20 +3,24 @@ import {
   PermissionUpdatePayloadSchema,
 } from "../schemas/permissionSchema/permission.schema.js";
 import { Permission } from "../schemas/permissionSchema/permission.type.js";
-import { createQueryParams, PaginationInterfaceHelper } from "../utils/queryHelper.js";
+import {
+  createQueryParams,
+  PaginationInterfaceHelper,
+} from "../utils/queryHelper.js";
 import { BaseModel } from "./baseModel.js";
 
 export class PermissionModel extends BaseModel {
   async createPermission(payload: PermissionBodySchema) {
     const query = `
-      INSERT INTO permissions (route, permission_name, method)
-      VALUES ($1, $2, $3)
+      INSERT INTO permissions (route, permission_name, method, is_menu)
+      VALUES ($1, $2, $3, $4)
       RETURNING *
     `;
     const result = await this._db.query(query, [
       payload.route,
       payload.permission_name,
       payload.method,
+      payload.is_menu,
     ]);
     return result.rows[0] as Permission;
   }
@@ -27,10 +31,12 @@ export class PermissionModel extends BaseModel {
 
     const { conditions, values } = createQueryParams(filters);
 
-    const query = `SELECT *, COUNT(*) OVER() as total FROM permissions WHERE deleted_at IS NULL ${conditions} ORDER BY created_at DESC LIMIT $${values.length + 1} OFFSET $${values.length + 2}`;
+    const query = `SELECT *, COUNT(*) OVER() as total FROM permissions WHERE deleted_at IS NULL ${conditions} ORDER BY created_at DESC LIMIT $${
+      values.length + 1
+    } OFFSET $${values.length + 2}`;
 
     const result = await this._db.query(query, [...values, limit, offset]);
-    const rows = result.rows as (Permission & {total: number})[];
+    const rows = result.rows as (Permission & { total: number })[];
     const total = rows[0]?.total ?? "0";
 
     return {
@@ -55,7 +61,7 @@ export class PermissionModel extends BaseModel {
       WHERE uuid = $3
       RETURNING *
     `;
-    const result = await this._db.query(query, [route,permission_name, uuid]);
+    const result = await this._db.query(query, [route, permission_name, uuid]);
     return result.rows[0] ?? null;
   }
 
@@ -72,5 +78,23 @@ export class PermissionModel extends BaseModel {
     const result = await this._db.query(query, uuids);
     const ids = result.rows.map((row) => row.id);
     return ids as number[];
+  }
+
+  async getPermissionWithOutMenu() {
+    const query = `
+      SELECT * FROM permissions
+      WHERE is_menu = false AND deleted_at IS NULL
+    `;
+    const result = await this._db.query(query);
+    return result.rows as Permission[];
+  }
+
+  async getPermissionMenu() {
+    const query = `
+      SELECT * FROM permissions
+      WHERE is_menu = true AND deleted_at IS NULL
+    `;
+    const result = await this._db.query(query);
+    return result.rows as Permission[];
   }
 }

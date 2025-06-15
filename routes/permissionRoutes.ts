@@ -4,6 +4,8 @@ import {
   DeletePermissionController,
   GetAllPermissionsController,
   GetPermissionByIdController,
+  GetPermissionMenuController,
+  GetPermissionWithOutMenuController,
   UpdatePermissionController,
 } from "../controllers/permissionControllers.js";
 import {
@@ -22,7 +24,14 @@ PermissionRouter.post(
   CreatePermissionController
 );
 
-PermissionRouter.get("/",  ValidateSchema(permissionQuerySchema, "query"), GetAllPermissionsController);
+PermissionRouter.get(
+  "/",
+  ValidateSchema(permissionQuerySchema, "query"),
+  GetAllPermissionsController
+);
+
+PermissionRouter.get("/no-menu", GetPermissionWithOutMenuController);
+PermissionRouter.get("/menu", GetPermissionMenuController);
 
 PermissionRouter.get(
   "/:uuid",

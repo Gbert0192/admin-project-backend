@@ -5,8 +5,8 @@ import { BaseModel } from "./baseModel.js";
 export class AuthModel extends BaseModel {
   async findUser(student_id: string) {
     const query = `
-      SELECT 
-        users.*, 
+      SELECT
+        users.*,
         r.role_name as role_name
       FROM users
       JOIN roles r ON r.id = users.role_id
