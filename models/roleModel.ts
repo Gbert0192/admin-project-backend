@@ -17,7 +17,6 @@ interface JoinedRolePermission {
 
 interface UserPermission {
   route: string;
-  permission_name: string;
   method: string[];
 }
 interface UserRoleWithPermission extends Role {
@@ -29,13 +28,8 @@ interface RoleWithPermissions extends Role {
   total: number;
 }
 
-interface Menu {
-  route: string;
-  permission_name: string;
-}
-
 interface UserRoleWithMenus {
-  menus: Menu[];
+  menus: string[];
 }
 
 export class RoleModel extends BaseModel {
@@ -127,7 +121,6 @@ export class RoleModel extends BaseModel {
         json_agg(
           json_build_object(
             'route', p.route,
-            'permission_name', p.permission_name,
             'method', to_json(p.method)
           )
         ) AS permissions
@@ -136,7 +129,7 @@ export class RoleModel extends BaseModel {
       LEFT JOIN
         permissions p ON p.id = ANY(r.permission_id)
       WHERE
-        r.id = $1
+        r.id = $1 and is_menu = false
       GROUP BY
         r.id;
     `;
@@ -145,22 +138,21 @@ export class RoleModel extends BaseModel {
   }
   async getRoleMenusById(id: number) {
     const query = `
-      SELECT
-        json_agg(
-          json_build_object(
-            'route', p.route,
-            'permission_name', p.permission_name
-          )
-        ) FILTER (WHERE p.id IS NOT NULL) AS menus
-      FROM
-        roles r
-      LEFT JOIN
-        permissions p ON p.id = ANY(r.permission_id) AND p.is_menu = true
-      WHERE
-        r.id = $1
-      GROUP BY
-        r.id;
+    SELECT
+      COALESCE(
+        json_agg(p.route) FILTER (WHERE p.id IS NOT NULL),
+        '[]'
+      ) AS menus
+    FROM
+      roles r
+    LEFT JOIN
+      permissions p ON p.id = ANY(r.permission_id) AND p.is_menu = true
+    WHERE
+      r.id = $1
+    GROUP BY
+      r.id;
     `;
+
     const result = await this._db.query(query, [id]);
     return result.rows[0] as UserRoleWithMenus;
   }
