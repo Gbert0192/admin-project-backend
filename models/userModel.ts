@@ -13,14 +13,27 @@ export class UserModel extends BaseModel {
     const { conditions, values } = createQueryParams(filters);
 
     const query = `
-      SELECT *, COUNT(*) OVER() as total
-      FROM users
-      WHERE deleted_at is null ${conditions}
-      ORDER BY created_at DESC
-      LIMIT $${values.length + 1} OFFSET $${values.length + 2}
+        SELECT
+          users.*,
+          roles.role_name,
+          COUNT(*) OVER() AS total
+        FROM users
+        JOIN roles ON users.role_id = roles.id
+        WHERE
+          users.deleted_at IS NULL
+          AND roles.role_name = $${values.length + 3} 
+          ${conditions}
+        ORDER BY users.created_at DESC
+        LIMIT $${values.length + 1}
+        OFFSET $${values.length + 2};
     `;
 
-    const result = await this._db.query(query, [...values, limit, offset]);
+    const result = await this._db.query(query, [
+      ...values,
+      limit,
+      offset,
+      "User",
+    ]);
     const rows = result.rows as (User & { total: number })[];
     const total = rows[0]?.total ?? "0";
 
