@@ -31,10 +31,13 @@ export class PermissionModel extends BaseModel {
 
     const { conditions, values } = createQueryParams(filters);
 
-    const query = `SELECT *, COUNT(*) OVER() as total FROM permissions WHERE deleted_at IS NULL ${conditions} ORDER BY created_at DESC LIMIT $${
-      values.length + 1
-    } OFFSET $${values.length + 2}`;
-
+    const query = `
+      SELECT *, COUNT(*) OVER() as total
+      FROM permissions
+      WHERE deleted_at IS NULL ${conditions}
+      ORDER BY updated_at DESC NULLS LAST
+      LIMIT $${values.length + 1} OFFSET $${values.length + 2}
+    `;
     const result = await this._db.query(query, [...values, limit, offset]);
     const rows = result.rows as (Permission & { total: number })[];
     const total = rows[0]?.total ?? "0";
@@ -57,7 +60,7 @@ export class PermissionModel extends BaseModel {
     const { route, uuid, permission_name } = payload;
     const query = `
       UPDATE permissions
-      SET route = $1, permission_name = $2
+      SET route = $1, permission_name = $2, updated_at = NOW()
       WHERE uuid = $3
       RETURNING *
     `;

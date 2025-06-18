@@ -9,6 +9,7 @@ import UserRouter from "./routes/userRoutes.js";
 import { apiLimiter } from "./middleware/rateLimiter.js";
 import { RoleRouter } from "./routes/roleRoutes.js";
 import { authMiddleware } from "./middleware/authMiddleware.js";
+import { FormRouter } from "./routes/formRoutes.js";
 
 dotenv.config();
 
@@ -30,6 +31,7 @@ app.use(authMiddleware);
 app.use("/user", UserRouter);
 app.use("/permission", PermissionRouter);
 app.use("/role", RoleRouter);
+app.use("/form", FormRouter);
 
 app.use(errorHandler);
 

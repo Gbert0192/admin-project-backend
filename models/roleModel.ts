@@ -77,7 +77,7 @@ export class RoleModel extends BaseModel {
       LEFT JOIN permissions p ON p.id = pid
       WHERE r.deleted_at IS NULL ${conditions}
       GROUP BY r.id
-      ORDER BY r.created_at DESC
+      ORDER BY updated_at DESC NULLS LAST
       LIMIT $${values.length + 1} OFFSET $${values.length + 2}
     `;
 
