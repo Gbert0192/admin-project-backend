@@ -1,0 +1,10 @@
+{
+  "question": "Teks pertanyaan Anda di sini",
+  "type": "tipe_soal_anda",
+  "point": 100,
+  "difficulty": "easy",
+  "options": [
+    { "option_text": "Teks pilihan A", "is_correct": false },
+    { "option_text": "Teks pilihan B", "is_correct": true }
+  ]
+}

@@ -2,14 +2,14 @@ import cors from "cors";
 import dotenv from "dotenv";
 import express, { Express } from "express";
 import logger from "./config/logger.js";
-import { errorHandler, notFoundHandler } from "./middleware/errorMiddleware.js";
-import { AuthRouter } from "./routes/authRoutes.js";
-import { PermissionRouter } from "./routes/permissionRoutes.js";
-import UserRouter from "./routes/userRoutes.js";
-import { apiLimiter } from "./middleware/rateLimiter.js";
-import { RoleRouter } from "./routes/roleRoutes.js";
 import { authMiddleware } from "./middleware/authMiddleware.js";
-import { FormRouter } from "./routes/formRoutes.js";
+import { errorHandler, notFoundHandler } from "./middleware/errorMiddleware.js";
+import { apiLimiter } from "./middleware/rateLimiter.js";
+import { AuthRouter } from "./routes/authRoutes.js";
+import { FornHuaweiRouter } from "./routes/formHuaweiRoutes.js";
+import { PermissionRouter } from "./routes/permissionRoutes.js";
+import { RoleRouter } from "./routes/roleRoutes.js";
+import UserRouter from "./routes/userRoutes.js";
 
 dotenv.config();
 
@@ -23,6 +23,7 @@ app.use(express.urlencoded({ extended: true }));
 app.set("trust proxy", 1);
 
 app.use(apiLimiter);
+app.use("/form-huawei", FornHuaweiRouter);
 
 app.use("/auth", AuthRouter);
 
@@ -31,7 +32,6 @@ app.use(authMiddleware);
 app.use("/user", UserRouter);
 app.use("/permission", PermissionRouter);
 app.use("/role", RoleRouter);
-app.use("/form", FormRouter);
 
 app.use(errorHandler);
 
