@@ -2,31 +2,40 @@ import { Router } from "express";
 
 import {
   CreateFormHuaweiController,
+  DeleteFormHuaweiController,
   GetFormHuaweiController,
+  UpdateFormHuaweiController,
 } from "../controllers/formHuaweiController.js";
 import {
   formHuaweiBodySchema,
   formHuaweiDeleteQuerySchema,
   formHuaweiQuerySchema,
-} from "../schemas/formSchema/form.schema.js";
+  formHuaweiUpdateBodySchema,
+} from "../schemas/formHuaweiSchema/formHuawei.schema.js";
 import { ValidateSchema } from "../utils/validateSchema.js";
 
-export const FornHuaweiRouter = Router();
+export const FormHuaweiRouter = Router();
 
-FornHuaweiRouter.post(
+FormHuaweiRouter.post(
   "/",
   ValidateSchema(formHuaweiBodySchema, "body"),
   CreateFormHuaweiController
 );
 
-FornHuaweiRouter.get(
+FormHuaweiRouter.put(
+  "/",
+  ValidateSchema(formHuaweiUpdateBodySchema, "body"),
+  UpdateFormHuaweiController
+);
+
+FormHuaweiRouter.get(
   "/",
   ValidateSchema(formHuaweiQuerySchema, "query"),
   GetFormHuaweiController
 );
 
-FornHuaweiRouter.delete(
+FormHuaweiRouter.delete(
   "/:uuid",
-  ValidateSchema(formHuaweiDeleteQuerySchema, "query"),
-  GetFormHuaweiController
+  ValidateSchema(formHuaweiDeleteQuerySchema, "params"),
+  DeleteFormHuaweiController
 );

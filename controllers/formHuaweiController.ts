@@ -8,7 +8,8 @@ import {
   createFormHuaweiService,
   updateFormHuaweiService,
   deleteFormHuaweiService,
-} from "../services/formServices.js";
+} from "../services/formHuaweiServices.js";
+import { pickKey } from "../utils/queryHelper.js";
 
 export const GetFormHuaweiController = async (
   req: Request,
@@ -17,13 +18,28 @@ export const GetFormHuaweiController = async (
 ) => {
   try {
     const formHuaweiModel = new FormHuaweiModel(pool);
-    const form = await getFormHuaweiService(formHuaweiModel)(
-      res.locals.cleaned
+    const {
+      data: form,
+      total,
+      limit,
+    } = await getFormHuaweiService(formHuaweiModel)(res.locals.cleaned);
+    const filteredFormHuawei = form.map((item) =>
+      pickKey(item, [
+        "uuid",
+        "form_title",
+        "form_description",
+        "is_published",
+        "created_at",
+      ])
     );
+    const totalPages = Math.ceil(total / limit);
+
     res.send({
-      data: form.data,
+      data: filteredFormHuawei,
       code: 201,
-      message: "Get Permission successfully!",
+      message: "Get Form successfully!",
+      total: total,
+      totalPages,
     });
   } catch (error) {
     next(error);
@@ -76,7 +92,7 @@ export const DeleteFormHuaweiController = async (
   try {
     const formHuaweiModel = new FormHuaweiModel(pool);
     const form = await deleteFormHuaweiService(formHuaweiModel)(
-      res.locals.cleaned
+      res.locals.cleaned.uuid
     );
     res.send({
       data: form,

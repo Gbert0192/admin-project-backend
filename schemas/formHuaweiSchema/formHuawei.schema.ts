@@ -9,13 +9,13 @@ export const formHuaweiBodySchema = z.object({
 });
 
 export const formHuaweiQuerySchema = z.object({
-  form_name: z.coerce.string().optional(),
+  form_title: z.coerce.string().optional(),
   limit: z.coerce.number().int().positive().optional(),
   page: z.coerce.number().int().positive().optional(),
 });
 
 export const formHuaweiUpdateBodySchema = z.object({
-  uuid: z.coerce.number().int().positive(),
+  uuid: z.string().min(1, { message: "UUID is required." }),
   form_title: z.string().min(1, { message: "Form Title is required." }),
   form_description: z
     .string()

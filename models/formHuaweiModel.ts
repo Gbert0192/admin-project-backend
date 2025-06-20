@@ -2,10 +2,14 @@ import {
   FormHuaweiBodySchema,
   FormHuaweiQuerySchema,
   FormHuaweiUpdateBodySchema,
-} from "../schemas/formSchema/form.schema.js";
-import { FormHuawei } from "../schemas/formSchema/form.type.js";
+} from "../schemas/formHuaweiSchema/formHuawei.schema.js";
+import { FormHuawei } from "../schemas/formHuaweiSchema/formHuawei.type.js";
 import { createQueryParams } from "../utils/queryHelper.js";
 import { BaseModel } from "./baseModel.js";
+
+interface FormHuaweiResponse extends FormHuawei {
+  total: number;
+}
 
 export class FormHuaweiModel extends BaseModel {
   async create(payload: FormHuaweiBodySchema) {
@@ -28,7 +32,7 @@ export class FormHuaweiModel extends BaseModel {
       ORDER BY updated_at DESC NULLS LAST
       LIMIT $${values.length + 1} OFFSET $${values.length + 2}`;
     const result = await this._db.query(query, [...values, limit, offset]);
-    const rows = result.rows as (FormHuawei & { total: number })[];
+    const rows = result.rows as FormHuaweiResponse[];
     const total = rows[0]?.total ?? "0";
     return {
       data: rows,
@@ -37,14 +41,14 @@ export class FormHuaweiModel extends BaseModel {
     };
   }
   async getByTitle(name: string) {
-    const query = `SELECT * FROM form_huawei WHERE form_title = $1`;
+    const query = `SELECT * FROM form_huawei WHERE form_title = $1 and deleted_at is null`;
     const result = await this._db.query(query, [name]);
     const forms = result.rows[0];
     return forms as FormHuawei;
   }
 
   async update(payload: FormHuaweiUpdateBodySchema) {
-    const query = `UPDATE form_huawei SET form_title = $1 ad form_description = $2 WHERE id = $3`;
+    const query = `UPDATE form_huawei SET form_title = $1, form_description = $2 WHERE uuid = $3 returning *`;
     const result = await this._db.query(query, [
       payload.form_title,
       payload.form_description,
@@ -54,7 +58,7 @@ export class FormHuaweiModel extends BaseModel {
     return forms;
   }
   async delete(uuid: string) {
-    const query = `UPDATE form_huawei SET deleted_at = NOW() WHERE uuid = $1`;
+    const query = `UPDATE form_huawei SET deleted_at = NOW() WHERE uuid = $1 and deleted_at is null returning *`;
     const result = await this._db.query(query, [uuid]);
     const forms = result.rows[0] as FormHuawei;
     return forms;

@@ -6,7 +6,7 @@ import { authMiddleware } from "./middleware/authMiddleware.js";
 import { errorHandler, notFoundHandler } from "./middleware/errorMiddleware.js";
 import { apiLimiter } from "./middleware/rateLimiter.js";
 import { AuthRouter } from "./routes/authRoutes.js";
-import { FornHuaweiRouter } from "./routes/formHuaweiRoutes.js";
+import { FormHuaweiRouter } from "./routes/formHuaweiRoutes.js";
 import { PermissionRouter } from "./routes/permissionRoutes.js";
 import { RoleRouter } from "./routes/roleRoutes.js";
 import UserRouter from "./routes/userRoutes.js";
@@ -23,7 +23,6 @@ app.use(express.urlencoded({ extended: true }));
 app.set("trust proxy", 1);
 
 app.use(apiLimiter);
-app.use("/form-huawei", FornHuaweiRouter);
 
 app.use("/auth", AuthRouter);
 
@@ -32,6 +31,7 @@ app.use(authMiddleware);
 app.use("/user", UserRouter);
 app.use("/permission", PermissionRouter);
 app.use("/role", RoleRouter);
+app.use("/form-huawei", FormHuaweiRouter);
 
 app.use(errorHandler);
 

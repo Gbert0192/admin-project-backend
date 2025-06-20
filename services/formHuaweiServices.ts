@@ -2,17 +2,16 @@ import { AppError } from "../middleware/errorMiddleware.js";
 import { FormHuaweiModel } from "../models/formHuaweiModel.js";
 import {
   FormHuaweiBodySchema,
-  FormHuaweiDeleteQuerySchema,
   FormHuaweiQuerySchema,
   FormHuaweiUpdateBodySchema,
-} from "../schemas/formSchema/form.schema.js";
+} from "../schemas/formHuaweiSchema/formHuawei.schema.js";
 
 export const createFormHuaweiService =
   (formHuaweiModel: FormHuaweiModel) =>
   async (payload: FormHuaweiBodySchema) => {
     const existingForm = await formHuaweiModel.getByTitle(payload.form_title);
     if (existingForm) {
-      throw new AppError("Form already exists", 401);
+      throw new AppError("Form already exists", 400);
     }
 
     const form = await formHuaweiModel.create(payload);
@@ -47,11 +46,10 @@ export const updateFormHuaweiService = (formHuaweiModel: FormHuaweiModel) => {
 };
 
 export const deleteFormHuaweiService =
-  (formHuaweiModel: FormHuaweiModel) =>
-  async (query: FormHuaweiDeleteQuerySchema) => {
-    const form = await formHuaweiModel.delete(query.uuid);
+  (formHuaweiModel: FormHuaweiModel) => async (uuid: string) => {
+    const form = await formHuaweiModel.delete(uuid);
     if (!form) {
-      throw new AppError("Failed to create Formm", 401);
+      throw new AppError("Failed to delete Formm", 401);
     }
     return form;
   };
