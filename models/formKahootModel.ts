@@ -51,7 +51,7 @@ export class FormKahootModel extends BaseModel {
   async updateFormKahoot(payload: FormKahootUpdateBodySchema) {
     const query = `
             UPDATE form_kahoot
-            SET form_title = $1, form_description = $2, is_published = $3
+            SET form_title = $1, form_description = $2, is_published = $3, updated_at = NOW()
             WHERE uuid = $4
             RETURNING *
         `;
