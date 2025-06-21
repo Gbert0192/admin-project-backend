@@ -130,6 +130,16 @@ export const questionsHuaweiBodySchema = z.discriminatedUnion("type", [
     }),
   }),
 ]);
+
+export const publishFormBodySchema = z.object({
+  uuid: z.string().min(1, { message: "UUID is required." }),
+  is_published: z.boolean().default(true),
+  essay_question: z.number().int().positive(),
+  multiple_choise_question: z.number().int().positive(),
+  single_choise_question: z.number().int().positive(),
+  true_false_question: z.number().int().positive(),
+});
+
 export type FormHuaweiBodySchema = z.infer<typeof formHuaweiBodySchema>;
 export type FormHuaweiQuerySchema = z.infer<typeof formHuaweiQuerySchema>;
 export type FormHuaweiUpdateBodySchema = z.infer<
@@ -144,3 +154,5 @@ export type QuestionsHuaweiBodySchema = z.infer<
 >;
 
 export type OptionHuaweiSchema = z.infer<typeof optionSchema>;
+
+export type PublishFormBodySchema = z.infer<typeof publishFormBodySchema>;

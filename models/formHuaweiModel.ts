@@ -3,6 +3,7 @@ import {
   FormHuaweiQuerySchema,
   FormHuaweiUpdateBodySchema,
   OptionHuaweiSchema,
+  PublishFormBodySchema,
   QuestionsHuaweiBodySchema,
 } from "../schemas/formHuaweiSchema/formHuawei.schema.js";
 import {
@@ -102,5 +103,27 @@ export class FormHuaweiModel extends BaseModel {
       question: newQuestion,
       options: optionsToReturn,
     };
+  }
+
+  async publish(payload: PublishFormBodySchema) {
+    const {
+      essay_question,
+      multiple_choise_question,
+      single_choise_question,
+      true_false_question,
+      uuid,
+      is_published,
+    } = payload;
+    const query = `UPDATE form_huawei SET is_published = $1, published_essay_count = $2, published_multiple_choice_count = $3, published_single_choice_count = $4, published_true_false_count = $5, WHERE uuid = $2 returning *`;
+    const result = await this._db.query(query, [
+      is_published,
+      essay_question,
+      multiple_choise_question,
+      single_choise_question,
+      true_false_question,
+      uuid,
+    ]);
+    const forms = result.rows[0] as FormHuawei;
+    return forms;
   }
 }

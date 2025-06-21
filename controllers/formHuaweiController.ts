@@ -9,6 +9,7 @@ import {
   updateFormHuaweiService,
   deleteFormHuaweiService,
   createFormHuaweiQuestionService,
+  publishFormHuaweiService,
 } from "../services/formHuaweiServices.js";
 import { pickKey } from "../utils/queryHelper.js";
 
@@ -121,6 +122,21 @@ export const CreateFormHuaweiQuestionController = async (
         code: 201,
         message: "Permission created successfully!",
       });
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const PublishFormHuaweiController = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    await createTransaction(pool)(async (trx) => {
+      const formHuaweiModel = new FormHuaweiModel(trx);
+      const form = await publishFormHuaweiService(formHuaweiModel)(req.body);
     });
   } catch (error) {
     next(error);

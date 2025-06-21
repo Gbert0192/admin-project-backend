@@ -5,6 +5,7 @@ import {
   CreateFormHuaweiQuestionController,
   DeleteFormHuaweiController,
   GetFormHuaweiController,
+  PublishFormHuaweiController,
   UpdateFormHuaweiController,
 } from "../controllers/formHuaweiController.js";
 import {
@@ -12,6 +13,7 @@ import {
   formHuaweiDeleteQuerySchema,
   formHuaweiQuerySchema,
   formHuaweiUpdateBodySchema,
+  publishFormBodySchema,
   questionsHuaweiBodySchema,
 } from "../schemas/formHuaweiSchema/formHuawei.schema.js";
 import { ValidateSchema } from "../utils/validateSchema.js";
@@ -46,4 +48,10 @@ FormHuaweiRouter.post(
   "/question/:formUuid",
   ValidateSchema(questionsHuaweiBodySchema, "body"),
   CreateFormHuaweiQuestionController
+);
+
+FormHuaweiRouter.post(
+  "/publish",
+  ValidateSchema(publishFormBodySchema, "body"),
+  PublishFormHuaweiController
 );
