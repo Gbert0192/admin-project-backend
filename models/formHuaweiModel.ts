@@ -2,8 +2,13 @@ import {
   FormHuaweiBodySchema,
   FormHuaweiQuerySchema,
   FormHuaweiUpdateBodySchema,
+  OptionHuaweiSchema,
+  QuestionsHuaweiBodySchema,
 } from "../schemas/formHuaweiSchema/formHuawei.schema.js";
-import { FormHuawei } from "../schemas/formHuaweiSchema/formHuawei.type.js";
+import {
+  FormHuawei,
+  QuestionHuawei,
+} from "../schemas/formHuaweiSchema/formHuawei.type.js";
 import { createQueryParams } from "../utils/queryHelper.js";
 import { BaseModel } from "./baseModel.js";
 
@@ -62,5 +67,40 @@ export class FormHuaweiModel extends BaseModel {
     const result = await this._db.query(query, [uuid]);
     const forms = result.rows[0] as FormHuawei;
     return forms;
+  }
+
+  async createQuestion(payload: QuestionsHuaweiBodySchema) {
+    const query = `INSERT INTO question_kahoot (type, point, difficulty, question) VALUES ($1, $2, $3) RETURNING *`;
+
+    const questionResult = await this._db.query(query, [
+      payload.type,
+      payload.point,
+      payload.difficulty,
+      payload.question,
+    ]);
+
+    const newQuestion = questionResult.rows[0] as QuestionHuawei;
+    const questionId = newQuestion.id;
+
+    let optionsToReturn = [];
+
+    const optionsArray = payload.options as OptionHuaweiSchema[];
+    const optionsQuery = `INSERT INTO options_huawei (question_id, option_text, is_correct) VALUES ($1, $2, $3) RETURNING *`;
+    const optionsQueryPromises = optionsArray.map((option) =>
+      this._db.query(optionsQuery, [
+        questionId,
+        option.option_text,
+        option.is_correct,
+      ])
+    );
+    const optionsResults = await Promise.all(optionsQueryPromises);
+    optionsToReturn = optionsResults.map(
+      (result) => result.rows[0]
+    ) as OptionHuaweiSchema[];
+
+    return {
+      question: newQuestion,
+      options: optionsToReturn,
+    };
   }
 }

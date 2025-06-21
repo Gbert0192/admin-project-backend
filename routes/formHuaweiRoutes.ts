@@ -2,6 +2,7 @@ import { Router } from "express";
 
 import {
   CreateFormHuaweiController,
+  CreateFormHuaweiQuestionController,
   DeleteFormHuaweiController,
   GetFormHuaweiController,
   UpdateFormHuaweiController,
@@ -11,6 +12,7 @@ import {
   formHuaweiDeleteQuerySchema,
   formHuaweiQuerySchema,
   formHuaweiUpdateBodySchema,
+  questionsHuaweiBodySchema,
 } from "../schemas/formHuaweiSchema/formHuawei.schema.js";
 import { ValidateSchema } from "../utils/validateSchema.js";
 
@@ -38,4 +40,10 @@ FormHuaweiRouter.delete(
   "/:uuid",
   ValidateSchema(formHuaweiDeleteQuerySchema, "params"),
   DeleteFormHuaweiController
+);
+
+FormHuaweiRouter.post(
+  "/question/:formUuid",
+  ValidateSchema(questionsHuaweiBodySchema, "body"),
+  CreateFormHuaweiQuestionController
 );

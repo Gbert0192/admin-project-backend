@@ -4,6 +4,7 @@ import {
   FormHuaweiBodySchema,
   FormHuaweiQuerySchema,
   FormHuaweiUpdateBodySchema,
+  QuestionsHuaweiBodySchema,
 } from "../schemas/formHuaweiSchema/formHuawei.schema.js";
 
 export const createFormHuaweiService =
@@ -15,6 +16,16 @@ export const createFormHuaweiService =
     }
 
     const form = await formHuaweiModel.create(payload);
+    if (!form) {
+      throw new AppError("Failed to create Formm", 401);
+    }
+    return form;
+  };
+
+export const createFormHuaweiQuestionService =
+  (formHuaweiModel: FormHuaweiModel) =>
+  async (payload: QuestionsHuaweiBodySchema) => {
+    const form = await formHuaweiModel.createQuestion(payload);
     if (!form) {
       throw new AppError("Failed to create Formm", 401);
     }
