@@ -140,6 +140,12 @@ export const publishFormBodySchema = z.object({
   true_false_question: z.number().int().positive(),
 });
 
+export const formHuaweiQuestionQuerySchema = z.object({
+  questions: z.coerce.string().optional(),
+  limit: z.coerce.number().int().positive().optional(),
+  page: z.coerce.number().int().positive().optional(),
+});
+
 export type FormHuaweiBodySchema = z.infer<typeof formHuaweiBodySchema>;
 export type FormHuaweiQuerySchema = z.infer<typeof formHuaweiQuerySchema>;
 export type FormHuaweiUpdateBodySchema = z.infer<
@@ -156,3 +162,7 @@ export type QuestionsHuaweiBodySchema = z.infer<
 export type OptionHuaweiSchema = z.infer<typeof optionSchema>;
 
 export type PublishFormBodySchema = z.infer<typeof publishFormBodySchema>;
+
+export type FormHuaweiQuestionQuerySchema = z.infer<
+  typeof formHuaweiQuestionQuerySchema
+>;

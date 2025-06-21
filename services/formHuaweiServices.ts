@@ -3,6 +3,7 @@ import { FormHuaweiModel } from "../models/formHuaweiModel.js";
 import {
   FormHuaweiBodySchema,
   FormHuaweiQuerySchema,
+  FormHuaweiQuestionQuerySchema,
   FormHuaweiUpdateBodySchema,
   PublishFormBodySchema,
   QuestionsHuaweiBodySchema,
@@ -75,3 +76,18 @@ export const publishFormHuaweiService = (formHuaweiModel: FormHuaweiModel) => {
     return form;
   };
 };
+
+export const getFormHuaweiQuestionService =
+  (formHuaweiModel: FormHuaweiModel) =>
+  async (query: FormHuaweiQuestionQuerySchema, form_uuid: string) => {
+    const form_id = await formHuaweiModel.getDetails(form_uuid);
+    const form = await formHuaweiModel.getQuestion(query, form_id.id);
+    if (!form) {
+      throw new AppError("Failed to create Form", 401);
+    }
+    return {
+      data: form.data,
+      total: form.total,
+      limit: form.limit,
+    };
+  };

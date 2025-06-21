@@ -20,7 +20,6 @@ export const errorHandler: ErrorRequestHandler = (
   _next: NextFunction
 ) => {
   logger.error(`[${req.method}] ${req.path} - ${err.name}: ${err.message}`);
-  logger.error(err.stack);
 
   if (err instanceof AppError) {
     res.status(err.statusCode).json({

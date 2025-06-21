@@ -10,6 +10,7 @@ import {
   deleteFormHuaweiService,
   createFormHuaweiQuestionService,
   publishFormHuaweiService,
+  getFormHuaweiQuestionService,
 } from "../services/formHuaweiServices.js";
 import { pickKey } from "../utils/queryHelper.js";
 
@@ -137,6 +138,28 @@ export const PublishFormHuaweiController = async (
     await createTransaction(pool)(async (trx) => {
       const formHuaweiModel = new FormHuaweiModel(trx);
       const form = await publishFormHuaweiService(formHuaweiModel)(req.body);
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const GetFormHuaweiQuestionController = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const formHuaweiModel = new FormHuaweiModel(pool);
+    const form_uuid = req.params.formUuid;
+    const form = await getFormHuaweiQuestionService(formHuaweiModel)(
+      res.locals.cleaned,
+      form_uuid
+    );
+    res.send({
+      data: form,
+      code: 201,
+      message: "Permission created successfully!",
     });
   } catch (error) {
     next(error);

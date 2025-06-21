@@ -1,6 +1,7 @@
 import {
   FormHuaweiBodySchema,
   FormHuaweiQuerySchema,
+  FormHuaweiQuestionQuerySchema,
   FormHuaweiUpdateBodySchema,
   OptionHuaweiSchema,
   PublishFormBodySchema,
@@ -45,6 +46,12 @@ export class FormHuaweiModel extends BaseModel {
       total: Number(total),
       limit: Number(limit ?? 0),
     };
+  }
+  async getDetails(uuid: string) {
+    const query = `SELECT * FROM form_huawei WHERE uuid = $1 and deleted_at is null`;
+    const result = await this._db.query(query, [uuid]);
+    const forms = result.rows[0];
+    return forms as FormHuawei;
   }
   async getByTitle(name: string) {
     const query = `SELECT * FROM form_huawei WHERE form_title = $1 and deleted_at is null`;
@@ -125,5 +132,30 @@ export class FormHuaweiModel extends BaseModel {
     ]);
     const forms = result.rows[0] as FormHuawei;
     return forms;
+  }
+
+  async getQuestion(q: FormHuaweiQuestionQuerySchema, form_id: number) {
+    const { limit = 10, page = 1, ...filters } = q;
+    const offset = (page - 1) * limit;
+    const { conditions, values } = createQueryParams(filters);
+    const query = `
+      SELECT *, COUNT(*) OVER() as total
+      FROM questions_huawei
+      WHERE form_id = $${values.length + 3} ${conditions}
+      ORDER BY updated_at DESC NULLS LAST
+      LIMIT $${values.length + 1} OFFSET $${values.length + 2}`;
+    const result = await this._db.query(query, [
+      ...values,
+      limit,
+      offset,
+      form_id,
+    ]);
+    const rows = result.rows as FormHuaweiResponse[];
+    const total = rows[0]?.total ?? "0";
+    return {
+      data: rows,
+      total: Number(total),
+      limit: Number(limit ?? 0),
+    };
   }
 }
