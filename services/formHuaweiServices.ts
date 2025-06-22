@@ -3,7 +3,10 @@ import { FormHuaweiModel } from "../models/formHuaweiModel.js";
 import {
   FormHuaweiBodySchema,
   FormHuaweiQuerySchema,
+  FormHuaweiQuestionQuerySchema,
   FormHuaweiUpdateBodySchema,
+  PublishFormBodySchema,
+  QuestionsHuaweiBodySchema,
 } from "../schemas/formHuaweiSchema/formHuawei.schema.js";
 
 export const createFormHuaweiService =
@@ -15,6 +18,16 @@ export const createFormHuaweiService =
     }
 
     const form = await formHuaweiModel.create(payload);
+    if (!form) {
+      throw new AppError("Failed to create Formm", 401);
+    }
+    return form;
+  };
+
+export const createFormHuaweiQuestionService =
+  (formHuaweiModel: FormHuaweiModel) =>
+  async (payload: QuestionsHuaweiBodySchema) => {
+    const form = await formHuaweiModel.createQuestion(payload);
     if (!form) {
       throw new AppError("Failed to create Formm", 401);
     }
@@ -52,4 +65,29 @@ export const deleteFormHuaweiService =
       throw new AppError("Failed to delete Formm", 401);
     }
     return form;
+  };
+
+export const publishFormHuaweiService = (formHuaweiModel: FormHuaweiModel) => {
+  return async (payload: PublishFormBodySchema) => {
+    const form = await formHuaweiModel.publish(payload);
+    if (!form) {
+      throw new AppError("Failed to create Formm", 401);
+    }
+    return form;
+  };
+};
+
+export const getFormHuaweiQuestionService =
+  (formHuaweiModel: FormHuaweiModel) =>
+  async (query: FormHuaweiQuestionQuerySchema, form_uuid: string) => {
+    const form_id = await formHuaweiModel.getDetails(form_uuid);
+    const form = await formHuaweiModel.getQuestion(query, form_id.id);
+    if (!form) {
+      throw new AppError("Failed to create Form", 401);
+    }
+    return {
+      data: form.data,
+      total: form.total,
+      limit: form.limit,
+    };
   };

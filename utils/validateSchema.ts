@@ -1,10 +1,8 @@
-// file: middleware/validateSchema.middleware.ts
-
 import { Request, Response, NextFunction } from "express";
-import { AnyZodObject, ZodError } from "zod";
+import { ZodSchema, ZodError } from "zod";
 
 export const ValidateSchema =
-  (schema: AnyZodObject, location: "body" | "query" | "params") =>
+  (schema: ZodSchema, location: "body" | "query" | "params") =>
   async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const validatedData = await schema.parseAsync(req[location]);
@@ -18,7 +16,7 @@ export const ValidateSchema =
     } catch (error) {
       if (error instanceof ZodError) {
         res.status(400).json({
-          message: "Unvalid request data",
+          message: "Invalid request data",
           errors: error.flatten().fieldErrors,
         });
         return;
