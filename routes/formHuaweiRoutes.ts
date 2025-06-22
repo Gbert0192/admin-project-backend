@@ -60,6 +60,6 @@ FormHuaweiRouter.post(
 
 FormHuaweiRouter.get(
   "/:formUuid",
-  ValidateSchema(formHuaweiQuestionQuerySchema, "params"),
+  ValidateSchema(formHuaweiQuestionQuerySchema, "query"),
   GetFormHuaweiQuestionController
 );

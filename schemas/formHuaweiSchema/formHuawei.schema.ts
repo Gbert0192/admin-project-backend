@@ -124,10 +124,12 @@ export const questionsHuaweiBodySchema = z.discriminatedUnion("type", [
     point: z.number().int().positive().min(1, "Point must be greater than 0"),
     difficulty: z.enum(["EASY", "MEDIUM", "HOT"]),
     question: z.string().min(1, { message: "Question is required." }),
-    options: z.object({
-      option_text: z.string().min(1, { message: "Answer is required." }),
-      is_correct: z.boolean().default(true).optional(),
-    }),
+    options: z.array(
+      z.object({
+        option_text: z.string().min(1, { message: "Answer is required." }),
+        is_correct: z.boolean().default(true),
+      })
+    ),
   }),
 ]);
 
@@ -141,7 +143,7 @@ export const publishFormBodySchema = z.object({
 });
 
 export const formHuaweiQuestionQuerySchema = z.object({
-  questions: z.coerce.string().optional(),
+  question: z.coerce.string().optional(),
   limit: z.coerce.number().int().positive().optional(),
   page: z.coerce.number().int().positive().optional(),
 });

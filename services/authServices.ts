@@ -30,9 +30,8 @@ export const loginUserService =
 
     const token = await generateToken({
       user_name: user.name,
-      user_id: user.uuid,
+      uuid: user.uuid,
       student_id: user.student_id,
-      user_uuid: user.uuid,
     });
 
     return {

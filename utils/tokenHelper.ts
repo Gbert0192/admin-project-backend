@@ -2,15 +2,15 @@ import jwt from "jsonwebtoken";
 
 interface TokenPayload {
   user_name: string;
-  user_id: string;
+  uuid: string;
   student_id: string;
-  user_uuid: string;
 }
 
 interface DecodedToken extends TokenPayload {
   student_id: string;
   name: string;
   role_id: number;
+  uuid: string;
   iat?: number;
   exp?: number;
 }

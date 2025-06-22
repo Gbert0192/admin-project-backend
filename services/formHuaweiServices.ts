@@ -26,8 +26,9 @@ export const createFormHuaweiService =
 
 export const createFormHuaweiQuestionService =
   (formHuaweiModel: FormHuaweiModel) =>
-  async (payload: QuestionsHuaweiBodySchema) => {
-    const form = await formHuaweiModel.createQuestion(payload);
+  async (payload: QuestionsHuaweiBodySchema, formUuid: string) => {
+    const formId = await formHuaweiModel.getDetails(formUuid);
+    const form = await formHuaweiModel.createQuestion(payload, formId.id);
     if (!form) {
       throw new AppError("Failed to create Formm", 401);
     }
@@ -83,7 +84,7 @@ export const getFormHuaweiQuestionService =
     const form_id = await formHuaweiModel.getDetails(form_uuid);
     const form = await formHuaweiModel.getQuestion(query, form_id.id);
     if (!form) {
-      throw new AppError("Failed to create Form", 401);
+      throw new AppError("Failed to get Form", 401);
     }
     return {
       data: form.data,

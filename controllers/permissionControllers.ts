@@ -11,6 +11,7 @@ import {
   updatePermissionService,
 } from "../services/permissionServices.js";
 import { pickKey } from "../utils/queryHelper.js";
+import { createTransaction } from "../config/transaction.js";
 
 export const CreatePermissionController = async (
   req: Request,
@@ -18,22 +19,26 @@ export const CreatePermissionController = async (
   next: NextFunction
 ) => {
   try {
-    const permissionModel = new PermissionModel(pool);
-    const permission = await createPermissionService(permissionModel)(req.body);
-    const filteredPermission = pickKey(permission, [
-      "uuid",
-      "is_menu",
-      "route",
-      "method",
-      "permission_name",
-      "created_at",
-      "updated_at",
-      "deleted_at",
-    ]);
-    res.send({
-      data: filteredPermission,
-      code: 201,
-      message: "Permission created successfully!",
+    await createTransaction(pool)(async (db) => {
+      const permissionModel = new PermissionModel(db);
+      const permission = await createPermissionService(permissionModel)(
+        req.body
+      );
+      const filteredPermission = pickKey(permission, [
+        "uuid",
+        "is_menu",
+        "route",
+        "method",
+        "permission_name",
+        "created_at",
+        "updated_at",
+        "deleted_at",
+      ]);
+      res.send({
+        data: filteredPermission,
+        code: 201,
+        message: "Permission created successfully!",
+      });
     });
   } catch (error) {
     next(error);
