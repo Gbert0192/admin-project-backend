@@ -77,14 +77,15 @@ export class FormHuaweiModel extends BaseModel {
     return forms;
   }
 
-  async createQuestion(payload: QuestionsHuaweiBodySchema) {
-    const query = `INSERT INTO question_kahoot (type, point, difficulty, question) VALUES ($1, $2, $3) RETURNING *`;
+  async createQuestion(payload: QuestionsHuaweiBodySchema, formId: number) {
+    const query = `INSERT INTO questions_huawei (type, point, difficulty, question, form_id) VALUES ($1, $2, $3, $4, $5) RETURNING *`;
 
     const questionResult = await this._db.query(query, [
       payload.type,
       payload.point,
       payload.difficulty,
       payload.question,
+      formId,
     ]);
 
     const newQuestion = questionResult.rows[0] as QuestionHuawei;
@@ -144,12 +145,14 @@ export class FormHuaweiModel extends BaseModel {
       WHERE form_id = $${values.length + 3} ${conditions}
       ORDER BY updated_at DESC NULLS LAST
       LIMIT $${values.length + 1} OFFSET $${values.length + 2}`;
+
     const result = await this._db.query(query, [
       ...values,
       limit,
       offset,
       form_id,
     ]);
+
     const rows = result.rows as FormHuaweiResponse[];
     const total = rows[0]?.total ?? "0";
     return {

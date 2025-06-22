@@ -6,6 +6,7 @@ interface DecodedToken {
   student_id: string;
   name: string;
   role_id: number;
+  uuid: string;
   iat?: number;
   exp?: number;
 }

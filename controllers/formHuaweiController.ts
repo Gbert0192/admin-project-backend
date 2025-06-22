@@ -115,8 +115,10 @@ export const CreateFormHuaweiQuestionController = async (
   try {
     await createTransaction(pool)(async (trx) => {
       const formHuaweiModel = new FormHuaweiModel(trx);
+      const formUuid = req.params.formUuid;
       const form = await createFormHuaweiQuestionService(formHuaweiModel)(
-        req.body
+        req.body,
+        formUuid
       );
       res.send({
         data: form,
@@ -157,7 +159,7 @@ export const GetFormHuaweiQuestionController = async (
       form_uuid
     );
     res.send({
-      data: form,
+      data: form.data,
       code: 201,
       message: "Permission created successfully!",
     });

@@ -40,6 +40,11 @@ export class RoleModel extends BaseModel {
     );
     return result.rows[0] as Role;
   }
+  async getDetails(uuid: string) {
+    const query = `select * from roles where uuid= $1 and deleted_at is null`;
+    const result = await this._db.query(query, [uuid]);
+    return result.rows[0] as Role;
+  }
 
   async createRole(payload: CreateRoleQuery) {
     const query = `
