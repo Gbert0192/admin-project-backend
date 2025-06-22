@@ -11,6 +11,7 @@ import {
   createFormHuaweiQuestionService,
   publishFormHuaweiService,
   getFormHuaweiQuestionService,
+  updateFormHuaweiQuestionService,
 } from "../services/formHuaweiServices.js";
 import { pickKey } from "../utils/queryHelper.js";
 
@@ -158,10 +159,43 @@ export const GetFormHuaweiQuestionController = async (
       res.locals.cleaned,
       form_uuid
     );
+    const filteredFormHuawei = form.data.map((item) =>
+      pickKey(item, [
+        "uuid",
+        "question",
+        "type",
+        "created_at",
+        "options",
+        "difficulty",
+        "point",
+      ])
+    );
     res.send({
-      data: form.data,
+      data: filteredFormHuawei,
       code: 201,
       message: "Permission created successfully!",
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const UpdateFormHuaweiQuestionController = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    await createTransaction(pool)(async (trx) => {
+      const formHuaweiModel = new FormHuaweiModel(trx);
+      const form = await updateFormHuaweiQuestionService(formHuaweiModel)(
+        req.body
+      );
+      res.send({
+        data: form,
+        code: 201,
+        message: "Permission created successfully!",
+      });
     });
   } catch (error) {
     next(error);

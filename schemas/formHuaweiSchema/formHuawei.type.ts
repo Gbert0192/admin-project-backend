@@ -20,3 +20,12 @@ export interface QuestionHuawei {
   created_at: Date;
   updated_at: Date | null;
 }
+
+export interface OptionHuawei {
+  id: number;
+  question_id: number;
+  option_text: string;
+  is_correct: boolean;
+  created_at: Date;
+  updated_at: Date | null;
+}
