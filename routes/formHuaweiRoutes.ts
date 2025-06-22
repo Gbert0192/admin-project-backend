@@ -17,6 +17,7 @@ import {
   formHuaweiUpdateBodySchema,
   publishFormBodySchema,
   questionsHuaweiBodySchema,
+  questionsHuaweiUpdateBodySchema,
 } from "../schemas/formHuaweiSchema/formHuawei.schema.js";
 import { ValidateSchema } from "../utils/validateSchema.js";
 
@@ -46,20 +47,27 @@ FormHuaweiRouter.delete(
   DeleteFormHuaweiController
 );
 
+//questions
 FormHuaweiRouter.post(
   "/question/:formUuid",
   ValidateSchema(questionsHuaweiBodySchema, "body"),
   CreateFormHuaweiQuestionController
 );
 
+FormHuaweiRouter.get(
+  "/question/:formUuid",
+  ValidateSchema(formHuaweiQuestionQuerySchema, "query"),
+  GetFormHuaweiQuestionController
+);
+
+FormHuaweiRouter.put(
+  "/question",
+  ValidateSchema(questionsHuaweiUpdateBodySchema, "body"),
+  PublishFormHuaweiController
+);
+
 FormHuaweiRouter.post(
   "/publish",
   ValidateSchema(publishFormBodySchema, "body"),
   PublishFormHuaweiController
-);
-
-FormHuaweiRouter.get(
-  "/:formUuid",
-  ValidateSchema(formHuaweiQuestionQuerySchema, "query"),
-  GetFormHuaweiQuestionController
 );

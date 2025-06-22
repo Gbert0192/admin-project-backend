@@ -6,15 +6,23 @@ import {
   OptionHuaweiSchema,
   PublishFormBodySchema,
   QuestionsHuaweiBodySchema,
+  QuestionsHuaweiUpdateBodySchema,
 } from "../schemas/formHuaweiSchema/formHuawei.schema.js";
 import {
   FormHuawei,
+  OptionHuawei,
   QuestionHuawei,
 } from "../schemas/formHuaweiSchema/formHuawei.type.js";
 import { createQueryParams } from "../utils/queryHelper.js";
 import { BaseModel } from "./baseModel.js";
 
 interface FormHuaweiResponse extends FormHuawei {
+  total: number;
+}
+
+interface FormHuaweiQuestionResponse extends QuestionHuawei {
+  options: OptionHuaweiSchema[];
+
   total: number;
 }
 
@@ -113,6 +121,53 @@ export class FormHuaweiModel extends BaseModel {
     };
   }
 
+  async updateQuestion(payload: QuestionsHuaweiUpdateBodySchema) {
+    const updateQuestionQuery = `
+        UPDATE questions_huawei
+        SET type = $1, point = $2, difficulty = $3, question = $4
+        WHERE uuid = $5
+        RETURNING *;
+    `;
+    const questionUpdateResult = await this._db.query(updateQuestionQuery, [
+      payload.type,
+      payload.point,
+      payload.difficulty,
+      payload.question,
+      payload.uuid,
+    ]);
+    const updatedQuestion = questionUpdateResult.rows[0] as QuestionHuawei;
+    const questionsOptions = await this._db.query(
+      `SELECT * FROM options_huawei WHERE question_id = $1`,
+      [updatedQuestion.id]
+    );
+    const options = questionsOptions.rows as OptionHuawei[];
+    const optionIdsToDelete = options.map((option) => option.id);
+
+    const optionsDeleteQueryAny = `DELETE FROM options_huawei WHERE id = ANY($1::int[])`;
+    await this._db.query(optionsDeleteQueryAny, [optionIdsToDelete]);
+
+    let optionsToReturn = [];
+
+    const optionsArray = payload.options as OptionHuaweiSchema[];
+    const optionsQuery = `INSERT INTO options_huawei (question_id, option_text, is_correct) VALUES ($1, $2, $3) RETURNING *`;
+    const optionsQueryPromises = optionsArray.map((option) =>
+      this._db.query(optionsQuery, [
+        updatedQuestion.id,
+        option.option_text,
+        option.is_correct,
+      ])
+    );
+    const optionsResults = await Promise.all(optionsQueryPromises);
+    optionsToReturn = optionsResults.map(
+      (result) => result.rows[0]
+    ) as OptionHuaweiSchema[];
+
+    return {
+      question: updatedQuestion,
+      options: optionsToReturn,
+    };
+  }
+
   async publish(payload: PublishFormBodySchema) {
     const {
       essay_question,
@@ -140,10 +195,23 @@ export class FormHuaweiModel extends BaseModel {
     const offset = (page - 1) * limit;
     const { conditions, values } = createQueryParams(filters);
     const query = `
-      SELECT *, COUNT(*) OVER() as total
-      FROM questions_huawei
-      WHERE form_id = $${values.length + 3} ${conditions}
-      ORDER BY updated_at DESC NULLS LAST
+      SELECT
+      q.*,
+      COUNT(*) OVER() as total,
+      COALESCE(
+        json_agg(
+          json_build_object(
+            'id', o.id,
+            'option_text', o.option_text,
+            'is_correct', o.is_correct
+          )
+        ) FILTER (WHERE o.id IS NOT NULL), '[]'
+      ) AS options
+      FROM questions_huawei q
+      LEFT JOIN options_huawei o ON o.question_id = q.id
+      WHERE q.form_id = $${values.length + 3} ${conditions}
+      GROUP BY q.id
+      ORDER BY q.updated_at DESC NULLS LAST
       LIMIT $${values.length + 1} OFFSET $${values.length + 2}`;
 
     const result = await this._db.query(query, [
@@ -153,7 +221,7 @@ export class FormHuaweiModel extends BaseModel {
       form_id,
     ]);
 
-    const rows = result.rows as FormHuaweiResponse[];
+    const rows = result.rows as FormHuaweiQuestionResponse[];
     const total = rows[0]?.total ?? "0";
     return {
       data: rows,
