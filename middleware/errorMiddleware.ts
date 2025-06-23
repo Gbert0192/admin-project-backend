@@ -16,10 +16,11 @@ export const errorHandler: ErrorRequestHandler = (
   err: Error | AppError,
   req: Request,
   res: Response,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars, no-unused-vars
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   _next: NextFunction
 ) => {
   logger.error(`[${req.method}] ${req.path} - ${err.name}: ${err.message}`);
+  logger.error(err.stack);
 
   if (err instanceof AppError) {
     res.status(err.statusCode).json({

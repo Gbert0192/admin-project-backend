@@ -8,6 +8,7 @@ import {
   GetFormHuaweiQuestionController,
   PublishFormHuaweiController,
   UpdateFormHuaweiController,
+  UpdateFormHuaweiQuestionController,
 } from "../controllers/formHuaweiController.js";
 import {
   formHuaweiBodySchema,
@@ -20,6 +21,7 @@ import {
   questionsHuaweiUpdateBodySchema,
 } from "../schemas/formHuaweiSchema/formHuawei.schema.js";
 import { ValidateSchema } from "../utils/validateSchema.js";
+import { z } from "zod";
 
 export const FormHuaweiRouter = Router();
 
@@ -63,7 +65,7 @@ FormHuaweiRouter.get(
 FormHuaweiRouter.put(
   "/question",
   ValidateSchema(questionsHuaweiUpdateBodySchema, "body"),
-  PublishFormHuaweiController
+  UpdateFormHuaweiQuestionController
 );
 
 FormHuaweiRouter.post(
