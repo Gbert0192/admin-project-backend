@@ -34,6 +34,10 @@ export const GetFormHuaweiController = async (
         "form_description",
         "is_published",
         "created_at",
+        "published_single_choice_count",
+        "published_multiple_choice_count",
+        "published_true_false_count",
+        "published_essay_count",
       ])
     );
     const totalPages = Math.ceil(total / limit);
@@ -141,6 +145,18 @@ export const PublishFormHuaweiController = async (
     await createTransaction(pool)(async (trx) => {
       const formHuaweiModel = new FormHuaweiModel(trx);
       const form = await publishFormHuaweiService(formHuaweiModel)(req.body);
+      const filteredFormHuawei = pickKey(form, [
+        "uuid",
+        "form_title",
+        "form_description",
+        "is_published",
+        "created_at",
+      ]);
+      res.send({
+        data: filteredFormHuawei,
+        code: 201,
+        message: "Permission created successfully!",
+      });
     });
   } catch (error) {
     next(error);
@@ -155,11 +171,15 @@ export const GetFormHuaweiQuestionController = async (
   try {
     const formHuaweiModel = new FormHuaweiModel(pool);
     const form_uuid = req.params.formUuid;
-    const form = await getFormHuaweiQuestionService(formHuaweiModel)(
+    const {
+      data: form,
+      total,
+      limit,
+    } = await getFormHuaweiQuestionService(formHuaweiModel)(
       res.locals.cleaned,
       form_uuid
     );
-    const filteredFormHuawei = form.data.map((item) =>
+    const filteredFormHuawei = form.map((item) =>
       pickKey(item, [
         "uuid",
         "question",
@@ -170,10 +190,15 @@ export const GetFormHuaweiQuestionController = async (
         "point",
       ])
     );
+
+    const totalPages = Math.ceil(total / limit);
+
     res.send({
       data: filteredFormHuawei,
       code: 201,
       message: "Permission created successfully!",
+      total: total,
+      totalPages,
     });
   } catch (error) {
     next(error);

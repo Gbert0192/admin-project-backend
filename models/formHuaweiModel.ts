@@ -44,7 +44,7 @@ export class FormHuaweiModel extends BaseModel {
       SELECT *, COUNT(*) OVER() as total
       FROM form_huawei
       WHERE deleted_at IS NULL ${conditions}
-      ORDER BY updated_at DESC NULLS LAST
+      ORDER BY GREATEST(updated_at, created_at) DESC NULLS LAST
       LIMIT $${values.length + 1} OFFSET $${values.length + 2}`;
     const result = await this._db.query(query, [...values, limit, offset]);
     const rows = result.rows as FormHuaweiResponse[];
@@ -69,7 +69,7 @@ export class FormHuaweiModel extends BaseModel {
   }
 
   async update(payload: FormHuaweiUpdateBodySchema) {
-    const query = `UPDATE form_huawei SET form_title = $1, form_description = $2 WHERE uuid = $3 returning *`;
+    const query = `UPDATE form_huawei SET form_title = $1, form_description = $2, updated_at = now() WHERE uuid = $3 returning *`;
     const result = await this._db.query(query, [
       payload.form_title,
       payload.form_description,
@@ -124,7 +124,7 @@ export class FormHuaweiModel extends BaseModel {
   async updateQuestion(payload: QuestionsHuaweiUpdateBodySchema) {
     const updateQuestionQuery = `
         UPDATE questions_huawei
-        SET type = $1, point = $2, difficulty = $3, question = $4
+        SET type = $1, point = $2, difficulty = $3, question = $4, updated_at = now()
         WHERE uuid = $5
         RETURNING *;
     `;
@@ -168,28 +168,6 @@ export class FormHuaweiModel extends BaseModel {
     };
   }
 
-  async publish(payload: PublishFormBodySchema) {
-    const {
-      essay_question,
-      multiple_choise_question,
-      single_choise_question,
-      true_false_question,
-      uuid,
-      is_published,
-    } = payload;
-    const query = `UPDATE form_huawei SET is_published = $1, published_essay_count = $2, published_multiple_choice_count = $3, published_single_choice_count = $4, published_true_false_count = $5, WHERE uuid = $2 returning *`;
-    const result = await this._db.query(query, [
-      is_published,
-      essay_question,
-      multiple_choise_question,
-      single_choise_question,
-      true_false_question,
-      uuid,
-    ]);
-    const forms = result.rows[0] as FormHuawei;
-    return forms;
-  }
-
   async getQuestion(q: FormHuaweiQuestionQuerySchema, form_id: number) {
     const { limit = 10, page = 1, ...filters } = q;
     const offset = (page - 1) * limit;
@@ -211,7 +189,7 @@ export class FormHuaweiModel extends BaseModel {
       LEFT JOIN options_huawei o ON o.question_id = q.id
       WHERE q.form_id = $${values.length + 3} ${conditions}
       GROUP BY q.id
-      ORDER BY q.updated_at DESC NULLS LAST
+      ORDER BY GREATEST(q.updated_at, q.created_at) DESC NULLS LAST
       LIMIT $${values.length + 1} OFFSET $${values.length + 2}`;
 
     const result = await this._db.query(query, [
@@ -228,5 +206,27 @@ export class FormHuaweiModel extends BaseModel {
       total: Number(total),
       limit: Number(limit ?? 0),
     };
+  }
+
+  async publish(payload: PublishFormBodySchema) {
+    const {
+      essay_question,
+      multiple_choise_question,
+      single_choise_question,
+      true_false_question,
+      uuid,
+      is_published,
+    } = payload;
+    const query = `UPDATE form_huawei SET is_published = $1, published_essay_count = $2, published_multiple_choice_count = $3, published_single_choice_count = $4, published_true_false_count = $5, updated_at = now() WHERE uuid = $2 returning *`;
+    const result = await this._db.query(query, [
+      is_published,
+      essay_question,
+      multiple_choise_question,
+      single_choise_question,
+      true_false_question,
+      uuid,
+    ]);
+    const forms = result.rows[0] as FormHuawei;
+    return forms;
   }
 }
