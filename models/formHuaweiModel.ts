@@ -229,4 +229,9 @@ export class FormHuaweiModel extends BaseModel {
     const forms = result.rows[0] as FormHuawei;
     return forms;
   }
+  async deleteQuestion(uuid: string) {
+    const query = `DELETE FROM questions_huawei WHERE uuid = $1 returning *`;
+    const data = await this._db.query(query, [uuid]);
+    return data.rows[0];
+  }
 }

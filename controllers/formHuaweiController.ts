@@ -12,6 +12,7 @@ import {
   publishFormHuaweiService,
   getFormHuaweiQuestionService,
   updateFormHuaweiQuestionService,
+  deleteFormHuaweiQuestionService,
 } from "../services/formHuaweiServices.js";
 import { pickKey } from "../utils/queryHelper.js";
 
@@ -105,7 +106,7 @@ export const DeleteFormHuaweiController = async (
     res.send({
       data: form,
       code: 201,
-      message: "Permission Deleted successfully!",
+      message: "Form Deleted successfully!",
     });
   } catch (error) {
     next(error);
@@ -220,6 +221,27 @@ export const UpdateFormHuaweiQuestionController = async (
         data: form,
         code: 201,
         message: "Permission created successfully!",
+      });
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const DeleteFormHuaweiQuestionController = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    await createTransaction(pool)(async (trx) => {
+      const formHuaweiModel = new FormHuaweiModel(trx);
+      const uuid = req.params.questionUuid;
+      const form = await deleteFormHuaweiQuestionService(formHuaweiModel)(uuid);
+      res.send({
+        data: form,
+        code: 201,
+        message: "Form Deleted successfully!",
       });
     });
   } catch (error) {
