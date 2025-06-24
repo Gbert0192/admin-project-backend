@@ -50,6 +50,7 @@ export const GetFormKahootController = async (
         "form_title",
         "form_description",
         "is_published",
+        "duration",
         "created_at",
       ])
     );
