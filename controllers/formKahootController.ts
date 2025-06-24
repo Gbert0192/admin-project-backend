@@ -121,7 +121,7 @@ export const CreateFormKahootQuestionController = async (
       const formKahootModel = new FormKahootModel(trx);
       const form = await createFormKahootQuestionService(formKahootModel)(
         req.body,
-        res.locals.cleaned.uuid
+        req.params.formUuid
       );
       res.send({
         data: form,

@@ -1,5 +1,4 @@
 import { z } from "zod";
-import { z } from "zod";
 
 // Forms
 export const formKahootBodySchema = z.object({
@@ -12,9 +11,6 @@ export const formKahootBodySchema = z.object({
 });
 
 export const formKahootQuerySchema = z.object({
-  form_name: z.coerce.string().optional(),
-  limit: z.coerce.number().int().positive().optional(),
-  page: z.coerce.number().int().positive().optional(),
   form_name: z.coerce.string().optional(),
   limit: z.coerce.number().int().positive().optional(),
   page: z.coerce.number().int().positive().optional(),
@@ -31,7 +27,6 @@ export const formKahootUpdateBodySchema = z.object({
 });
 
 export const formKahootDeleteQuerySchema = z.object({
-  uuid: z.coerce.string(),
   uuid: z.coerce.string(),
 });
 
