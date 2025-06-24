@@ -10,6 +10,7 @@ import { FormHuaweiRouter } from "./routes/formHuaweiRoutes.js";
 import { PermissionRouter } from "./routes/permissionRoutes.js";
 import { RoleRouter } from "./routes/roleRoutes.js";
 import UserRouter from "./routes/userRoutes.js";
+import { FormKahootRouter } from "./routes/formKahootRoutes.js";
 
 dotenv.config();
 
@@ -32,6 +33,7 @@ app.use("/user", UserRouter);
 app.use("/permission", PermissionRouter);
 app.use("/role", RoleRouter);
 app.use("/form-huawei", FormHuaweiRouter);
+app.use("/form-kahoot", FormKahootRouter);
 
 app.use(errorHandler);
 
