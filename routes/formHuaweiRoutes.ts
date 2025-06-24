@@ -4,6 +4,7 @@ import {
   CreateFormHuaweiController,
   CreateFormHuaweiQuestionController,
   DeleteFormHuaweiController,
+  DeleteFormHuaweiQuestionController,
   GetFormHuaweiController,
   GetFormHuaweiQuestionController,
   PublishFormHuaweiController,
@@ -71,4 +72,9 @@ FormHuaweiRouter.post(
   "/publish",
   ValidateSchema(publishFormBodySchema, "body"),
   PublishFormHuaweiController
+);
+
+FormHuaweiRouter.delete(
+  "/question/:questionUuid",
+  DeleteFormHuaweiQuestionController
 );

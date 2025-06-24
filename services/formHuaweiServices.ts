@@ -103,3 +103,15 @@ export const getFormHuaweiQuestionService =
       limit: form.limit,
     };
   };
+
+export const deleteFormHuaweiQuestionService = (
+  formHuaweiModel: FormHuaweiModel
+) => {
+  return async (uuid: string) => {
+    const form = await formHuaweiModel.deleteQuestion(uuid);
+    if (!form) {
+      throw new AppError("Failed to delete Form", 401);
+    }
+    return form;
+  };
+};
