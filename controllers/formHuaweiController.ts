@@ -39,10 +39,13 @@ export const GetFormHuaweiController = async (
         "published_multiple_choice_count",
         "published_true_false_count",
         "published_essay_count",
+        "essay_count",
+        "single_choice_count",
+        "multiple_choice_count",
+        "true_false_count",
       ])
     );
     const totalPages = Math.ceil(total / limit);
-
     res.send({
       data: filteredFormHuawei,
       code: 201,

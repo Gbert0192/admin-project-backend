@@ -18,11 +18,14 @@ import { BaseModel } from "./baseModel.js";
 
 interface FormHuaweiResponse extends FormHuawei {
   total: number;
+  essay_count: number;
+  single_choice_count: number;
+  multiple_choice_count: number;
+  true_false_count: number;
 }
 
 interface FormHuaweiQuestionResponse extends QuestionHuawei {
   options: OptionHuaweiSchema[];
-
   total: number;
 }
 
@@ -40,17 +43,33 @@ export class FormHuaweiModel extends BaseModel {
     const { limit = 10, page = 1, ...filters } = q;
     const offset = (page - 1) * limit;
     const { conditions, values } = createQueryParams(filters);
+
     const query = `
-      SELECT *, COUNT(*) OVER() as total
-      FROM form_huawei
-      WHERE deleted_at IS NULL ${conditions}
-      ORDER BY GREATEST(updated_at, created_at) DESC NULLS LAST
+      SELECT
+        fh.*,
+        COUNT(*) OVER() as total,
+        COUNT(CASE WHEN qh.type = 'ESSAY' THEN 1 END) AS essay_count,
+        COUNT(CASE WHEN qh.type = 'SINGLE_CHOICE' THEN 1 END) AS single_choice_count,
+        COUNT(CASE WHEN qh.type = 'MULTIPLE_CHOICE' THEN 1 END) AS multiple_choice_count,
+        COUNT(CASE WHEN qh.type = 'TRUE_FALSE' THEN 1 END) AS true_false_count
+      FROM
+        form_huawei AS fh
+      LEFT JOIN
+        questions_huawei AS qh ON fh.id = qh.form_id
+      WHERE
+        fh.deleted_at IS NULL ${conditions}
+      GROUP BY
+        fh.id, fh.form_title, fh.created_at, fh.updated_at, fh.deleted_at 
+      ORDER BY
+        GREATEST(fh.updated_at, fh.created_at) DESC NULLS LAST
       LIMIT $${values.length + 1} OFFSET $${values.length + 2}`;
+
     const result = await this._db.query(query, [...values, limit, offset]);
-    const rows = result.rows as FormHuaweiResponse[];
+    const rows = result.rows;
     const total = rows[0]?.total ?? "0";
+
     return {
-      data: rows,
+      data: rows as FormHuaweiResponse[],
       total: Number(total),
       limit: Number(limit ?? 0),
     };
