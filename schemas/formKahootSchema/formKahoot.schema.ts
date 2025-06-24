@@ -62,12 +62,14 @@ export const questionsKahootBodySchema = z
     }
   );
 
-export const questionsKahootUpdateBodySchema = z.object({
-  uuid: z.coerce.string().uuid({ message: "Invalid UUID format." }),
-  question_text: z.string().min(1, { message: "Question text is required." }),
-  question_type: z.enum(["single_choice", "multiple_choice", "true_false"]),
-  options: z.array(optionsKahootSchema),
-}) .refine(
+export const questionsKahootUpdateBodySchema = z
+  .object({
+    uuid: z.coerce.string().uuid({ message: "Invalid UUID format." }),
+    question_text: z.string().min(1, { message: "Question text is required." }),
+    question_type: z.enum(["single_choice", "multiple_choice", "true_false"]),
+    options: z.array(optionsKahootSchema),
+  })
+  .refine(
     (data) =>
       (data.question_type !== "single_choice" &&
         data.question_type !== "multiple_choice") ||
@@ -114,12 +116,14 @@ export type FormKahootDeleteQuerySchema = z.infer<
 export type OptionsKahootSchema = z.infer<typeof optionsKahootSchema>;
 
 // Questions
-export type QuestionsKahootBodySchema = z.infer<typeof questionsKahootBodySchema>;
-export type QuestionsKahootUpdateBodySchema = z.infer<typeof questionsKahootUpdateBodySchema>;
+export type QuestionsKahootBodySchema = z.infer<
+  typeof questionsKahootBodySchema
+>;
+export type QuestionsKahootUpdateBodySchema = z.infer<
+  typeof questionsKahootUpdateBodySchema
+>;
 export type QuestionKahootQuerySchema = z.infer<
   typeof questionKahootQuerySchema
 >;
 
-export type AnswerSubmissionSchema = z.infer<
-  typeof answerSubmissionSchema
->;
+export type AnswerSubmissionSchema = z.infer<typeof answerSubmissionSchema>;
