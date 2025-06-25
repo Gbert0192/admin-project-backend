@@ -218,6 +218,11 @@ export class FormKahootModel extends BaseModel {
       question: updatedQuestion,
       options: optionsToReturn,
     };
-    
+  }
+
+  async deleteQuestionKahoot(uuid: string) {
+    const query = `DELETE FROM questions_kahoot WHERE uuid = $1 RETURNING *`;
+    const result = await this._db.query(query, [uuid]);
+    return result.rows[0] as QuestionKahoot;
   }
 }

@@ -83,7 +83,7 @@ export const updateFormKahootQuestionService =
   };
 
 export const getFormKahootQuestionService =
- (formKahootModel: FormKahootModel) =>
+  (formKahootModel: FormKahootModel) =>
   async (query: QuestionKahootQuerySchema, form_uuid: string) => {
     const form_id = await formKahootModel.getAllDataFormKahoots(form_uuid);
     const form = await formKahootModel.getQuestionsKahoot(query, form_id.id);
@@ -97,3 +97,14 @@ export const getFormKahootQuestionService =
     };
   };
 
+export const deleteFormKahootQuestionService = (
+  formKahootModel: FormKahootModel
+) => {
+  return async (uuid: string) => {
+    const form = await formKahootModel.deleteQuestionKahoot(uuid);
+    if (!form) {
+      throw new AppError("Failed to delete Question", 401);
+    }
+    return form;
+  };
+};

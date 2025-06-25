@@ -9,6 +9,7 @@ import {
   updateFormKahootService,
   createFormKahootQuestionService,
   updateFormKahootQuestionService,
+  deleteFormKahootQuestionService,
 } from "../services/formKahootServices.js";
 import { pickKey } from "../utils/queryHelper.js";
 
@@ -180,6 +181,29 @@ export const UpdateFormKahootQuestionController = async (
         data: form,
         code: 201,
         message: "Update Question successfully!",
+      });
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const DeleteFormKahootQuestionController = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    await createTransaction(pool)(async (trx) => {
+      const formKahootModel = new FormKahootModel(trx);
+      const questionUuid = req.params.questionUuid;
+      const form = await deleteFormKahootQuestionService(formKahootModel)(
+        questionUuid
+      );
+      res.send({
+        data: form,
+        code: 201,
+        message: "Delete Question successfully!",
       });
     });
   } catch (error) {
