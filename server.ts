@@ -27,12 +27,13 @@ app.use(apiLimiter);
 
 app.use("/auth", AuthRouter);
 
+app.use("/form-huawei", FormHuaweiRouter);
+
 app.use(authMiddleware);
 
 app.use("/user", UserRouter);
 app.use("/permission", PermissionRouter);
 app.use("/role", RoleRouter);
-app.use("/form-huawei", FormHuaweiRouter);
 app.use("/form-kahoot", FormKahootRouter);
 
 app.use(errorHandler);
