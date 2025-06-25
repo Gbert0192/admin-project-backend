@@ -11,6 +11,8 @@ import { PermissionRouter } from "./routes/permissionRoutes.js";
 import { RoleRouter } from "./routes/roleRoutes.js";
 import UserRouter from "./routes/userRoutes.js";
 import { FormKahootRouter } from "./routes/formKahootRoutes.js";
+import { DashboardAdminRouter } from "./routes/dashboardAdminRoutes.js";
+import { DashboardUserRouter } from "./routes/dashboardUserRoutes.js";
 
 dotenv.config();
 
@@ -27,13 +29,17 @@ app.use(apiLimiter);
 
 app.use("/auth", AuthRouter);
 
-app.use("/form-huawei", FormHuaweiRouter);
+
+
+app.use(DashboardAdminRouter);
 
 app.use(authMiddleware);
 
 app.use("/user", UserRouter);
 app.use("/permission", PermissionRouter);
 app.use("/role", RoleRouter);
+app.use("/dashboard-admin", DashboardUserRouter);
+app.use("/form-huawei", FormHuaweiRouter);
 app.use("/form-kahoot", FormKahootRouter);
 
 app.use(errorHandler);
