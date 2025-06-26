@@ -81,7 +81,14 @@ export const deleteFormHuaweiService =
 
 export const publishFormHuaweiService = (formHuaweiModel: FormHuaweiModel) => {
   return async (payload: PublishFormBodySchema) => {
-    const form = await formHuaweiModel.publish(payload);
+    const filteredPayload = {
+      ...payload,
+      essay_question: Number(payload.essay_question),
+      single_choice_question: Number(payload.single_choice_question),
+      multiple_choice_question: Number(payload.multiple_choice_question),
+      true_false_question: Number(payload.true_false_question),
+    };
+    const form = await formHuaweiModel.publish(filteredPayload);
     if (!form) {
       throw new AppError("Failed to create Formm", 401);
     }

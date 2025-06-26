@@ -230,18 +230,18 @@ export class FormHuaweiModel extends BaseModel {
   async publish(payload: PublishFormBodySchema) {
     const {
       essay_question,
-      multiple_choise_question,
-      single_choise_question,
+      multiple_choice_question,
+      single_choice_question,
       true_false_question,
       uuid,
       is_published,
     } = payload;
-    const query = `UPDATE form_huawei SET is_published = $1, published_essay_count = $2, published_multiple_choice_count = $3, published_single_choice_count = $4, published_true_false_count = $5, updated_at = now() WHERE uuid = $2 returning *`;
+    const query = `UPDATE form_huawei SET is_published = $1, published_essay_count = $2, published_multiple_choice_count = $3, published_single_choice_count = $4, published_true_false_count = $5, updated_at = now() WHERE uuid = $6 returning *`;
     const result = await this._db.query(query, [
       is_published,
       essay_question,
-      multiple_choise_question,
-      single_choise_question,
+      multiple_choice_question,
+      single_choice_question,
       true_false_question,
       uuid,
     ]);

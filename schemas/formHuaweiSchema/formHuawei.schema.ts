@@ -89,10 +89,10 @@ export const questionsHuaweiUpdateBodySchema = z
 export const publishFormBodySchema = z.object({
   uuid: z.string().min(1, { message: "UUID is required." }),
   is_published: z.boolean().default(true),
-  essay_question: z.number().int().positive(),
-  multiple_choise_question: z.number().int().positive(),
-  single_choise_question: z.number().int().positive(),
-  true_false_question: z.number().int().positive(),
+  essay_question: z.string(),
+  multiple_choice_question: z.string(),
+  single_choice_question: z.string(),
+  true_false_question: z.string(),
 });
 
 export const formHuaweiQuestionQuerySchema = z.object({
