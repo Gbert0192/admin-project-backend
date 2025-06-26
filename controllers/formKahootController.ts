@@ -10,6 +10,7 @@ import {
   createFormKahootQuestionService,
   updateFormKahootQuestionService,
   deleteFormKahootQuestionService,
+  getFormKahootService,
 } from "../services/formKahootServices.js";
 import { pickKey } from "../utils/queryHelper.js";
 
@@ -44,13 +45,19 @@ export const GetFormKahootController = async (
       data: form,
       total,
       limit,
-    } = await formKahootModel.getAllFormKahoots(res.locals.cleaned);
+    } = await getFormKahootService(formKahootModel)(res.locals.cleaned);
     const filteredFormKahoot = form.map((item) =>
       pickKey(item, [
         "uuid",
         "form_title",
         "form_description",
         "duration",
+        "published_single_choice_count",
+        "published_multiple_choice_count",
+        "published_true_false_count",
+        "single_choice_count",
+        "multiple_choice_count",
+        "true_false_count",
         "created_at",
       ])
     );
@@ -217,7 +224,7 @@ export const PublishFormKahootController = async (
 ) => {
   try {
     await createTransaction(pool)(async (trx) => {
-    const formKahootModel = new FormKahootModel(trx);
+      const formKahootModel = new FormKahootModel(trx);
       const form = await formKahootModel.publishFormKahoot(req.body);
       pickKey(form, [
         "uuid",

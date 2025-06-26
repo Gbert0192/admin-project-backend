@@ -17,6 +17,9 @@ import { BaseModel } from "./baseModel.js";
 
 interface FormKahootResponse extends FormKahoot {
   total: number;
+  single_choice_count: number;
+  multiple_choice_count: number;
+  true_false_count: number;
 }
 
 interface FormKahootQuestionResponse extends QuestionKahoot {
@@ -39,11 +42,11 @@ export class FormKahootModel extends BaseModel {
     const offset = (page - 1) * limit;
     const { conditions, values } = createQueryParams(filters);
 
-const query = `
+    const query = `
   SELECT
     fk.*,
     COUNT(*) OVER() as total,
-    COUNT(CASE WHEN qk.question_type = 'single_chocie' THEN 1 END) AS single_choice_count,
+    COUNT(CASE WHEN qk.question_type = 'single_choice' THEN 1 END) AS single_choice_count,
     COUNT(CASE WHEN qk.question_type = 'multiple_choice' THEN 1 END) AS multiple_choice_count,
     COUNT(CASE WHEN qk.question_type = 'true_false' THEN 1 END) AS true_false_count
   FROM
