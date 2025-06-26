@@ -22,7 +22,6 @@ export const formKahootUpdateBodySchema = z.object({
   form_description: z
     .string()
     .min(1, { message: "Form Description is required." }),
-  is_published: z.boolean().default(false),
   duration: z.number().min(5).max(120).default(20),
 });
 
@@ -102,6 +101,14 @@ export const answerSubmissionSchema = z.object({
   question_started_at: z.number(),
 });
 
+export const publishFormKahootBodySchema = z.object({
+  uuid: z.coerce.string().uuid({ message: "Invalid UUID format." }),
+  is_published: z.boolean().default(true),
+  multiple_choice_question: z.number().int().positive(),
+  single_choice_question: z.number().int().positive(),
+  true_false_question: z.number().int().positive(),
+});
+
 // Form
 export type FormKahootBodySchema = z.infer<typeof formKahootBodySchema>;
 export type FormKahootQuerySchema = z.infer<typeof formKahootQuerySchema>;
@@ -127,3 +134,5 @@ export type QuestionKahootQuerySchema = z.infer<
 >;
 
 export type AnswerSubmissionSchema = z.infer<typeof answerSubmissionSchema>;
+
+export type PublishFormKahootBodySchema = z.infer<typeof publishFormKahootBodySchema>;

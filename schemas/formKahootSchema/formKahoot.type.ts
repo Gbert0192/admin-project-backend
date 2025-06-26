@@ -4,6 +4,9 @@ export interface FormKahoot {
   form_title: string;
   form_description: string;
   is_published: boolean;
+  published_single_choice_count: number;
+  published_multiple_choice_count: number;
+  published_true_false_count: number;
   duration: number;
   created_at: Date;
   updated_at: Date | null;

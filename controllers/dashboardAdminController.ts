@@ -15,10 +15,10 @@ export const GetTotalHuaweiFormsController = async (
   try {
     const dashboardAdminModel = new DashboardAdminModel(pool);
     const totalForms = await getTotalHuaweiFormsService(dashboardAdminModel)();
-    res.send(200).json({
+    res.send({
       status: "success",
       data: totalForms,
-      message: "Total Huawei forms retrieved successfully!",
+      message: "Total Kahoot forms retrieved successfully!",
     });
   } catch (error) {
     next(error);
@@ -33,7 +33,7 @@ export const GetTotalKahootFormsController = async (
   try {
     const dashboardAdminModel = new DashboardAdminModel(pool);
     const totalForms = await getTotalKahootFormsService(dashboardAdminModel)();
-    res.send(200).json({
+    res.send({
       status: "success",
       data: totalForms,
       message: "Total Kahoot forms retrieved successfully!",
@@ -51,7 +51,7 @@ export const GetTotalUsersController = async (
   try {
     const dashboardAdminModel = new DashboardAdminModel(pool);
     const totalUsers = await getTotalUsersService(dashboardAdminModel)();
-    res.send(200).json({
+    res.send({
       status: "success",
       data: totalUsers,
       message: "Total users retrieved successfully!",

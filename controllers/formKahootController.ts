@@ -50,7 +50,6 @@ export const GetFormKahootController = async (
         "uuid",
         "form_title",
         "form_description",
-        "is_published",
         "duration",
         "created_at",
       ])
@@ -204,6 +203,33 @@ export const DeleteFormKahootQuestionController = async (
         data: form,
         code: 201,
         message: "Delete Question successfully!",
+      });
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const PublishFormKahootController = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    await createTransaction(pool)(async (trx) => {
+    const formKahootModel = new FormKahootModel(trx);
+      const form = await formKahootModel.publishFormKahoot(req.body);
+      pickKey(form, [
+        "uuid",
+        "is_published",
+        "published_single_choice_count",
+        "published_multiple_choice_count",
+        "published_true_false_count",
+      ]);
+      res.send({
+        data: form,
+        code: 201,
+        message: "Publish Form successfully!",
       });
     });
   } catch (error) {

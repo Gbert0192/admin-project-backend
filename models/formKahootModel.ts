@@ -3,6 +3,7 @@ import {
   FormKahootQuerySchema,
   FormKahootUpdateBodySchema,
   OptionsKahootSchema,
+  PublishFormKahootBodySchema,
   QuestionKahootQuerySchema,
   QuestionsKahootBodySchema,
   QuestionsKahootUpdateBodySchema,
@@ -76,14 +77,13 @@ export class FormKahootModel extends BaseModel {
   async updateFormKahoot(payload: FormKahootUpdateBodySchema) {
     const query = `
             UPDATE form_kahoot
-            SET form_title = $1, form_description = $2, is_published = $3, updated_at = NOW()
-            WHERE uuid = $4
+            SET form_title = $1, form_description = $2, updated_at = NOW()
+            WHERE uuid = $3
             RETURNING *
         `;
     const result = await this._db.query(query, [
       payload.form_title,
       payload.form_description,
-      payload.is_published,
       payload.uuid,
     ]);
     return result.rows[0] as FormKahoot;
@@ -224,5 +224,29 @@ export class FormKahootModel extends BaseModel {
     const query = `DELETE FROM questions_kahoot WHERE uuid = $1 RETURNING *`;
     const result = await this._db.query(query, [uuid]);
     return result.rows[0] as QuestionKahoot;
+  }
+
+  async publishFormKahoot(payload: PublishFormKahootBodySchema) {
+    const {
+      is_published,
+      single_choice_question,
+      multiple_choice_question,
+      true_false_question,
+      uuid
+    } = payload;
+    const query = `
+            UPDATE form_kahoot
+            SET is_published = $1, single_choice_question = $2, multiple_choice_question = $3, true_false_question = $4, updated_at = NOW()
+            WHERE uuid = $5
+            RETURNING *
+        `;
+    const result = await this._db.query(query, [
+      is_published,
+      uuid,
+      single_choice_question,
+      multiple_choice_question,
+      true_false_question,
+    ]);
+    return result.rows[0] as FormKahoot;
   }
 }

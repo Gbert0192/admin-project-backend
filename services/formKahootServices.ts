@@ -4,6 +4,7 @@ import {
   FormKahootBodySchema,
   FormKahootQuerySchema,
   FormKahootUpdateBodySchema,
+  PublishFormKahootBodySchema,
   QuestionKahootQuerySchema,
   QuestionsKahootBodySchema,
   QuestionsKahootUpdateBodySchema,
@@ -107,4 +108,12 @@ export const deleteFormKahootQuestionService = (
     }
     return form;
   };
+};
+
+export const publishFormKahootService = (formKahootModel: FormKahootModel) => async (payload: PublishFormKahootBodySchema) => {
+  const form = await formKahootModel.publishFormKahoot(payload);
+  if (!form) {
+    throw new AppError("Failed to publish Form", 401);
+  }
+  return form;
 };

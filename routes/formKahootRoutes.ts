@@ -5,6 +5,7 @@ import {
   formKahootDeleteQuerySchema,
   formKahootQuerySchema,
   formKahootUpdateBodySchema,
+  publishFormKahootBodySchema,
   questionKahootQuerySchema,
   questionsKahootBodySchema,
   questionsKahootUpdateBodySchema,
@@ -16,6 +17,7 @@ import {
   DeleteFormKahootQuestionController,
   GetFormKahootController,
   GetFormKahootQuestionController,
+  PublishFormKahootController,
   UpdateFormKahootController,
   UpdateFormKahootQuestionController,
 } from "../controllers/formKahootController.js";
@@ -65,4 +67,10 @@ FormKahootRouter.put(
 FormKahootRouter.delete(
   "/question/:questionUuid",
   DeleteFormKahootQuestionController
+);
+
+FormKahootRouter.post(
+  "/publish",
+  ValidateSchema(publishFormKahootBodySchema, "body"),
+  PublishFormKahootController
 );
