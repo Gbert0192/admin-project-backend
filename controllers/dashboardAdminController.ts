@@ -7,54 +7,26 @@ import {
 } from "../services/dashboardAdminService.js";
 import pool from "../config/database.js";
 
-export const GetTotalHuaweiFormsController = async (
+export const GetDashboardDataController = async (
   req: Request,
   res: Response,
   next: NextFunction
 ) => {
   try {
     const dashboardAdminModel = new DashboardAdminModel(pool);
-    const totalForms = await getTotalHuaweiFormsService(dashboardAdminModel)();
+    const [totaluaweiForms, totalKahootForms, totalUsers] = await Promise.all([
+      getTotalHuaweiFormsService(dashboardAdminModel)(),
+      getTotalKahootFormsService(dashboardAdminModel)(),
+      getTotalUsersService(dashboardAdminModel)(),
+    ]);
     res.send({
       status: "success",
-      data: totalForms,
-      message: "Total Kahoot forms retrieved successfully!",
-    });
-  } catch (error) {
-    next(error);
-  }
-};
-
-export const GetTotalKahootFormsController = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
-  try {
-    const dashboardAdminModel = new DashboardAdminModel(pool);
-    const totalForms = await getTotalKahootFormsService(dashboardAdminModel)();
-    res.send({
-      status: "success",
-      data: totalForms,
-      message: "Total Kahoot forms retrieved successfully!",
-    });
-  } catch (error) {
-    next(error);
-  }
-};
-
-export const GetTotalUsersController = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
-  try {
-    const dashboardAdminModel = new DashboardAdminModel(pool);
-    const totalUsers = await getTotalUsersService(dashboardAdminModel)();
-    res.send({
-      status: "success",
-      data: totalUsers,
-      message: "Total users retrieved successfully!",
+      data: {
+        total_huawei_forms: Number(totaluaweiForms),
+        total_kahoot_forms: Number(totalKahootForms),
+        total_users: Number(totalUsers),
+      },
+      message: "Dashboard data retrieved successfully!",
     });
   } catch (error) {
     next(error);
