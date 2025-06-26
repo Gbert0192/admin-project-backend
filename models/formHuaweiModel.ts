@@ -227,7 +227,14 @@ export class FormHuaweiModel extends BaseModel {
     };
   }
 
-  async publish(payload: PublishFormBodySchema) {
+  async publish(payload: {
+    uuid: string;
+    is_published: boolean;
+    essay_question: number;
+    multiple_choice_question: number;
+    single_choice_question: number;
+    true_false_question: number;
+  }) {
     const {
       essay_question,
       multiple_choice_question,
