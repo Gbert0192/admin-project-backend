@@ -3,7 +3,6 @@ import {
   FormKahootQuerySchema,
   FormKahootUpdateBodySchema,
   OptionsKahootSchema,
-  PublishFormKahootBodySchema,
   QuestionKahootQuerySchema,
   QuestionsKahootBodySchema,
   QuestionsKahootUpdateBodySchema,
@@ -25,7 +24,6 @@ interface FormKahootQuestionResponse extends QuestionKahoot {
   total: number;
 }
 
-
 export class FormKahootModel extends BaseModel {
   async createFormKahoot(payload: FormKahootBodySchema) {
     const value = Object.values(payload);
@@ -42,10 +40,15 @@ export class FormKahootModel extends BaseModel {
     const { conditions, values } = createQueryParams(filters);
 
     const query = `
-      SELECT *, COUNT(*) OVER() as total
-      FROM form_kahoot
-      WHERE deleted_at IS NULL ${conditions}
-      ORDER BY updated_at DESC NULLS LAST
+      SELECT *, COUNT(*) OVER() as total,
+      COUNT(CASE WHEN single_choice_question THEN 1 END) as single_choice_count,
+      COUNT(CASE WHEN multiple_choice_question THEN 1 END) as multiple_choice_count,
+      COUNT(CASE WHEN true_false_question THEN 1 END) as true_false_count
+      FROM form_kahoot as fk
+      LEFT JOIN questions_kahoot as qk ON fk.id = qk.form_id
+      WHERE fk.deleted_at IS NULL ${conditions}
+      GROUP BY fk.id, fk.form_title, fk.created_at, fk.updated_at, fk.deleted_at 
+      ORDER BY GREATEST(fk.updated_at, fk.created_at) DESC NULLS LAST
       LIMIT $${values.length + 1} OFFSET $${values.length + 2}`;
 
     const result = await this._db.query(query, [...values, limit, offset]);
@@ -59,12 +62,12 @@ export class FormKahootModel extends BaseModel {
     };
   }
 
-   async getAllDataFormKahoots(uuid: string) {
-        const query = `SELECT * FROM form_kahoot WHERE uuid = $1 and deleted_at is null`;
-        const result = await this._db.query(query, [uuid]);
-        const forms = result.rows[0];
-        return forms as FormKahoot;
-   }
+  async getAllDataFormKahoots(uuid: string) {
+    const query = `SELECT * FROM form_kahoot WHERE uuid = $1 and deleted_at is null`;
+    const result = await this._db.query(query, [uuid]);
+    const forms = result.rows[0];
+    return forms as FormKahoot;
+  }
 
   async getFormKahootByTitle(name: string) {
     const query = `
@@ -143,9 +146,9 @@ export class FormKahootModel extends BaseModel {
 
   async getQuestionsKahoot(q: QuestionKahootQuerySchema, form_id: number) {
     const { limit = 10, page = 1, ...filters } = q;
-        const offset = (page - 1) * limit;
-        const { conditions, values } = createQueryParams(filters);
-        const query = `
+    const offset = (page - 1) * limit;
+    const { conditions, values } = createQueryParams(filters);
+    const query = `
           SELECT
           q.*,
           COUNT(*) OVER() as total,
@@ -164,21 +167,21 @@ export class FormKahootModel extends BaseModel {
           GROUP BY q.id
           ORDER BY q.updated_at DESC NULLS LAST
           LIMIT $${values.length + 1} OFFSET $${values.length + 2}`;
-    
-        const result = await this._db.query(query, [
-          ...values,
-          limit,
-          offset,
-          form_id,
-        ]);
-    
-        const rows = result.rows as FormKahootQuestionResponse[];
-        const total = rows[0]?.total ?? "0";
-        return {
-          data: rows,
-          total: Number(total),
-          limit: Number(limit ?? 0),
-        };
+
+    const result = await this._db.query(query, [
+      ...values,
+      limit,
+      offset,
+      form_id,
+    ]);
+
+    const rows = result.rows as FormKahootQuestionResponse[];
+    const total = rows[0]?.total ?? "0";
+    return {
+      data: rows,
+      total: Number(total),
+      limit: Number(limit ?? 0),
+    };
   }
 
   async updateQuestionKahoot(payload: QuestionsKahootUpdateBodySchema) {
@@ -190,7 +193,10 @@ export class FormKahootModel extends BaseModel {
     ]);
 
     const updatedQuestion = questionUpdateResult.rows[0] as QuestionKahoot;
-    const questionsOptions = await this._db.query(`SELECT * FROM options_kahoot WHERE question_id = $1`, [updatedQuestion.id]);
+    const questionsOptions = await this._db.query(
+      `SELECT * FROM options_kahoot WHERE question_id = $1`,
+      [updatedQuestion.id]
+    );
     const options = questionsOptions.rows as OptionKahoot[];
     const optionIdsToDelete = options.map((option) => option.id);
 
@@ -199,7 +205,7 @@ export class FormKahootModel extends BaseModel {
 
     let optionsToReturn = [];
 
-        const optionsArray = payload.options as OptionsKahootSchema[];
+    const optionsArray = payload.options as OptionsKahootSchema[];
     const optionsQuery = `INSERT INTO options_kahoot (question_id, option_text, is_correct) VALUES ($1, $2, $3) RETURNING *`;
     const optionsQueryPromises = optionsArray.map((option) =>
       this._db.query(optionsQuery, [
@@ -226,26 +232,32 @@ export class FormKahootModel extends BaseModel {
     return result.rows[0] as QuestionKahoot;
   }
 
-  async publishFormKahoot(payload: PublishFormKahootBodySchema) {
+  async publishFormKahoot(payload: {
+    uuid: string;
+    is_published: boolean;
+    multiple_choice_question: number;
+    single_choice_question: number;
+    true_false_question: number;
+  }) {
     const {
       is_published,
       single_choice_question,
       multiple_choice_question,
       true_false_question,
-      uuid
+      uuid,
     } = payload;
     const query = `
             UPDATE form_kahoot
-            SET is_published = $1, single_choice_question = $2, multiple_choice_question = $3, true_false_question = $4, updated_at = NOW()
+            SET is_published = $1, published_multiple_choice_count = $2, published_single_choice_count = $3, published_true_false_count = $4, updated_at = now()
             WHERE uuid = $5
             RETURNING *
         `;
     const result = await this._db.query(query, [
       is_published,
-      uuid,
       single_choice_question,
       multiple_choice_question,
       true_false_question,
+      uuid,
     ]);
     return result.rows[0] as FormKahoot;
   }

@@ -110,10 +110,18 @@ export const deleteFormKahootQuestionService = (
   };
 };
 
-export const publishFormKahootService = (formKahootModel: FormKahootModel) => async (payload: PublishFormKahootBodySchema) => {
-  const form = await formKahootModel.publishFormKahoot(payload);
-  if (!form) {
-    throw new AppError("Failed to publish Form", 401);
-  }
-  return form;
+export const publishFormKahootService = (formKahootModel: FormKahootModel) => {
+  return async (payload: PublishFormKahootBodySchema) => {
+    const filteredPayload = {
+      ...payload,
+      single_choice_question: Number(payload.single_choice_question),
+      multiple_choice_question: Number(payload.multiple_choice_question),
+      true_false_question: Number(payload.true_false_question),
+    };
+    const form = await formKahootModel.publishFormKahoot(filteredPayload);
+    if (!form) {
+      throw new AppError("Failed to publish Form", 401);
+    }
+    return form;
+  };
 };

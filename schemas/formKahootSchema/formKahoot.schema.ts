@@ -104,9 +104,9 @@ export const answerSubmissionSchema = z.object({
 export const publishFormKahootBodySchema = z.object({
   uuid: z.coerce.string().uuid({ message: "Invalid UUID format." }),
   is_published: z.boolean().default(true),
-  multiple_choice_question: z.number().int().positive(),
-  single_choice_question: z.number().int().positive(),
-  true_false_question: z.number().int().positive(),
+  single_choice_question: z.string(),
+  multiple_choice_question: z.string(),
+  true_false_question: z.string(),
 });
 
 // Form
