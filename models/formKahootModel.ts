@@ -39,17 +39,24 @@ export class FormKahootModel extends BaseModel {
     const offset = (page - 1) * limit;
     const { conditions, values } = createQueryParams(filters);
 
-    const query = `
-      SELECT *, COUNT(*) OVER() as total,
-      COUNT(CASE WHEN single_choice_question THEN 1 END) as single_choice_count,
-      COUNT(CASE WHEN multiple_choice_question THEN 1 END) as multiple_choice_count,
-      COUNT(CASE WHEN true_false_question THEN 1 END) as true_false_count
-      FROM form_kahoot as fk
-      LEFT JOIN questions_kahoot as qk ON fk.id = qk.form_id
-      WHERE fk.deleted_at IS NULL ${conditions}
-      GROUP BY fk.id, fk.form_title, fk.created_at, fk.updated_at, fk.deleted_at 
-      ORDER BY GREATEST(fk.updated_at, fk.created_at) DESC NULLS LAST
-      LIMIT $${values.length + 1} OFFSET $${values.length + 2}`;
+const query = `
+  SELECT
+    fk.*,
+    COUNT(*) OVER() as total,
+    COUNT(CASE WHEN qk.question_type = 'single_chocie' THEN 1 END) AS single_choice_count,
+    COUNT(CASE WHEN qk.question_type = 'multiple_choice' THEN 1 END) AS multiple_choice_count,
+    COUNT(CASE WHEN qk.question_type = 'true_false' THEN 1 END) AS true_false_count
+  FROM
+    form_kahoot AS fk
+  LEFT JOIN
+    questions_kahoot AS qk ON fk.id = qk.form_id
+  WHERE
+    fk.deleted_at IS NULL ${conditions}
+  GROUP BY
+    fk.id, fk.form_title, fk.created_at, fk.updated_at, fk.deleted_at 
+  ORDER BY
+    GREATEST(fk.updated_at, fk.created_at) DESC NULLS LAST
+  LIMIT $${values.length + 1} OFFSET $${values.length + 2}`;
 
     const result = await this._db.query(query, [...values, limit, offset]);
     const rows = result.rows as FormKahootResponse[];
