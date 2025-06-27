@@ -29,6 +29,10 @@ interface FormHuaweiQuestionResponse extends QuestionHuawei {
   total: number;
 }
 
+interface QuestionIdMap {
+  id: number;
+  uuid: string;
+}
 export class FormHuaweiModel extends BaseModel {
   async create(payload: FormHuaweiBodySchema) {
     const value = Object.values(payload);
@@ -38,6 +42,12 @@ export class FormHuaweiModel extends BaseModel {
     const result = await this._db.query(query, value);
     const forms = result.rows[0];
     return forms;
+  }
+
+  async getPublished() {
+    const query = `select * from form_huawei where is_published = true and deleted_at is null`;
+    const result = await this._db.query(query);
+    return result.rows as FormHuawei[];
   }
   async get(q: FormHuaweiQuerySchema) {
     const { limit = 10, page = 1, ...filters } = q;
@@ -73,6 +83,26 @@ export class FormHuaweiModel extends BaseModel {
       total: Number(total),
       limit: Number(limit ?? 0),
     };
+  }
+
+  async getDetail(uuid: string) {
+    const query = `
+      SELECT
+        fh.*
+      FROM
+        form_huawei AS fh
+      LEFT JOIN
+        questions_huawei AS qh ON fh.id = qh.form_id
+      WHERE
+        fh.deleted_at IS NULL and fh.uuid = $1 and is_published = true
+      GROUP BY
+        fh.id, fh.form_title, fh.created_at, fh.updated_at, fh.deleted_at 
+      ORDER BY
+        GREATEST(fh.updated_at, fh.created_at) DESC NULLS LAST`;
+
+    const result = await this._db.query(query, [uuid]);
+    const rows = result.rows[0];
+    return rows as FormHuawei;
   }
   async getDetails(uuid: string) {
     const query = `SELECT * FROM form_huawei WHERE uuid = $1 and deleted_at is null`;
@@ -229,6 +259,7 @@ export class FormHuaweiModel extends BaseModel {
 
   async publish(payload: {
     uuid: string;
+    durations: number;
     is_published: boolean;
     essay_question: number;
     multiple_choice_question: number;
@@ -242,14 +273,16 @@ export class FormHuaweiModel extends BaseModel {
       true_false_question,
       uuid,
       is_published,
+      durations,
     } = payload;
-    const query = `UPDATE form_huawei SET is_published = $1, published_essay_count = $2, published_multiple_choice_count = $3, published_single_choice_count = $4, published_true_false_count = $5, updated_at = now() WHERE uuid = $6 returning *`;
+    const query = `UPDATE form_huawei SET is_published = $1, published_essay_count = $2, published_multiple_choice_count = $3, published_single_choice_count = $4, published_true_false_count = $5, durations = $6, updated_at = now() WHERE uuid = $7 returning *`;
     const result = await this._db.query(query, [
       is_published,
       essay_question,
       multiple_choice_question,
       single_choice_question,
       true_false_question,
+      durations,
       uuid,
     ]);
     const forms = result.rows[0] as FormHuawei;
@@ -259,5 +292,74 @@ export class FormHuaweiModel extends BaseModel {
     const query = `DELETE FROM questions_huawei WHERE uuid = $1 returning *`;
     const data = await this._db.query(query, [uuid]);
     return data.rows[0];
+  }
+
+  async unPublish(uuid: string) {
+    const query = `UPDATE form_huawei SET is_published = false, updated_at = now() WHERE uuid = $1 returning *`;
+    const data = await this._db.query(query, [uuid]);
+    return data.rows[0];
+  }
+
+  async getQuizQuestion(form_id: number) {
+    const query = `
+      WITH RankedQuestions AS (
+        SELECT
+          q.*,
+          ROW_NUMBER() OVER(PARTITION BY q.type ORDER BY RANDOM()) as random_rank
+        FROM
+          questions_huawei q
+        WHERE
+          q.form_id = $1
+      )
+      SELECT
+        rq.uuid,
+        rq.question,
+        rq.type,
+        rq.difficulty,
+        rq.point,
+        rq.created_at,
+        COALESCE(
+          JSON_AGG(
+            JSON_BUILD_OBJECT(
+              'id', opt.id,
+              'option_text', opt.option_text,
+              'is_correct', opt.is_correct
+            )
+          ) FILTER (WHERE opt.id IS NOT NULL),
+          '[]'::json
+        ) AS options
+      FROM
+        RankedQuestions rq
+      JOIN
+        form_huawei fh ON rq.form_id = fh.id
+      LEFT JOIN
+        options_huawei opt ON rq.id = opt.question_id
+      WHERE
+        CASE
+          WHEN rq.type = 'ESSAY' THEN rq.random_rank <= fh.published_essay_count
+          WHEN rq.type = 'MULTIPLE_CHOICE' THEN rq.random_rank <= fh.published_multiple_choice_count
+          WHEN rq.type = 'SINGLE_CHOICE' THEN rq.random_rank <= fh.published_single_choice_count
+          WHEN rq.type = 'TRUE_FALSE' THEN rq.random_rank <= fh.published_true_false_count
+          ELSE false
+        END
+      GROUP BY
+        rq.id,
+        rq.uuid,
+        rq.question,
+        rq.type,
+        rq.difficulty,
+        rq.point,
+        rq.created_at
+      ORDER BY RANDOM();
+    `;
+    const result = await this._db.query(query, [form_id]);
+    const rows = result.rows as FormHuaweiQuestionResponse[];
+    return rows;
+  }
+
+  async getIdQuestionsByUuidBulk(uuids: string[]) {
+    const query = `SELECT id, uuid FROM questions_huawei WHERE uuid = ANY($1::uuid[]);`;
+    const result = await this._db.query(query, [uuids]);
+    return result.rows as QuestionIdMap[];
   }
 }

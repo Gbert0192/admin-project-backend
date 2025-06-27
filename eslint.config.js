@@ -46,6 +46,7 @@ export default tseslint.config(
       "@typescript-eslint/no-empty-function": "warn",
       "@typescript-eslint/no-var-requires": "warn",
       "@typescript-eslint/no-explicit-any": "warn",
+      "@typescript-eslint/no-unsafe-return": "warn",
     },
   }
 );
