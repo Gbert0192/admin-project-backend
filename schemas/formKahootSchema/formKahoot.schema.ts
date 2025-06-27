@@ -135,4 +135,6 @@ export type QuestionKahootQuerySchema = z.infer<
 
 export type AnswerSubmissionSchema = z.infer<typeof answerSubmissionSchema>;
 
-export type PublishFormKahootBodySchema = z.infer<typeof publishFormKahootBodySchema>;
+export type PublishFormKahootBodySchema = z.infer<
+  typeof publishFormKahootBodySchema
+>;

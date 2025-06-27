@@ -51,13 +51,32 @@ export const getFormHuaweiService =
   async (query: FormHuaweiQuerySchema) => {
     const form = await formHuaweiModel.get(query);
     if (!form) {
-      throw new AppError("Failed to create Formm", 401);
+      throw new AppError("Failed to Get Form", 401);
     }
+
     return {
       data: form.data,
       total: form.total,
       limit: form.limit,
     };
+  };
+
+export const getFormHuaweiDetailService =
+  (formHuaweiModel: FormHuaweiModel) => async (formUuid: string) => {
+    const form = await formHuaweiModel.getDetail(formUuid);
+    if (!form) {
+      throw new AppError("Failed to Get Form", 401);
+    }
+
+    return form;
+  };
+export const getPublishedFormHuaweiService =
+  (formHuaweiModel: FormHuaweiModel) => async () => {
+    const form = await formHuaweiModel.getPublished();
+    if (!form) {
+      throw new AppError("Failed to Get Form", 401);
+    }
+    return form;
   };
 
 export const updateFormHuaweiService = (formHuaweiModel: FormHuaweiModel) => {
@@ -83,6 +102,7 @@ export const publishFormHuaweiService = (formHuaweiModel: FormHuaweiModel) => {
   return async (payload: PublishFormBodySchema) => {
     const filteredPayload = {
       ...payload,
+      durations: Number(payload.durations),
       essay_question: Number(payload.essay_question),
       single_choice_question: Number(payload.single_choice_question),
       multiple_choice_question: Number(payload.multiple_choice_question),
@@ -91,6 +111,18 @@ export const publishFormHuaweiService = (formHuaweiModel: FormHuaweiModel) => {
     const form = await formHuaweiModel.publish(filteredPayload);
     if (!form) {
       throw new AppError("Failed to create Formm", 401);
+    }
+    return form;
+  };
+};
+
+export const unPublishFormHuaweiService = (
+  formHuaweiModel: FormHuaweiModel
+) => {
+  return async (uuid: string) => {
+    const form = await formHuaweiModel.unPublish(uuid);
+    if (!form) {
+      throw new AppError("Failed to Unpublish Form", 401);
     }
     return form;
   };
@@ -118,6 +150,19 @@ export const deleteFormHuaweiQuestionService = (
     const form = await formHuaweiModel.deleteQuestion(uuid);
     if (!form) {
       throw new AppError("Failed to delete Form", 401);
+    }
+    return form;
+  };
+};
+
+export const getFormHuaweiQuizQuestionService = (
+  formHuaweiModel: FormHuaweiModel
+) => {
+  return async (form_uuid: string) => {
+    const form_id = await formHuaweiModel.getDetails(form_uuid);
+    const form = await formHuaweiModel.getQuizQuestion(form_id.id);
+    if (!form) {
+      throw new AppError("Failed to get Form", 401);
     }
     return form;
   };

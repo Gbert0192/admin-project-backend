@@ -6,8 +6,12 @@ import {
   DeleteFormHuaweiController,
   DeleteFormHuaweiQuestionController,
   GetFormHuaweiController,
+  GetFormHuaweiDetailController,
   GetFormHuaweiQuestionController,
+  GetFormHuaweiQuizQuestionController,
+  GetPublishedFormHuaweiController,
   PublishFormHuaweiController,
+  UnPublishFormHuaweiController,
   UpdateFormHuaweiController,
   UpdateFormHuaweiQuestionController,
 } from "../controllers/formHuaweiController.js";
@@ -43,6 +47,10 @@ FormHuaweiRouter.get(
   GetFormHuaweiController
 );
 
+FormHuaweiRouter.get("/published", GetPublishedFormHuaweiController);
+
+FormHuaweiRouter.get("/:formUuid", GetFormHuaweiDetailController);
+
 FormHuaweiRouter.delete(
   "/:uuid",
   ValidateSchema(formHuaweiDeleteQuerySchema, "params"),
@@ -74,7 +82,16 @@ FormHuaweiRouter.post(
   PublishFormHuaweiController
 );
 
+FormHuaweiRouter.put(
+  "/unpublish/:formUuid",
+  ValidateSchema(formHuaweiDeleteQuerySchema, "params"),
+  UnPublishFormHuaweiController
+);
+
 FormHuaweiRouter.delete(
   "/question/:questionUuid",
   DeleteFormHuaweiQuestionController
 );
+
+//user
+FormHuaweiRouter.get("/quiz/:formUuid", GetFormHuaweiQuizQuestionController);
