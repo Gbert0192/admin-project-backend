@@ -42,6 +42,15 @@ export const getFormKahootService =
     };
   };
 
+export const getFormKahootDetailService =
+  (formKahootModel: FormKahootModel) => async (formUuid: string) => {
+    const form = await formKahootModel.getDetail(formUuid);
+    if (!form) {
+      throw new AppError("Failed to get form", 401);
+    }
+    return form;
+  };
+
 export const updateFormKahootService =
   (formKahootModel: FormKahootModel) =>
   async (payload: FormKahootUpdateBodySchema) => {
@@ -85,9 +94,9 @@ export const updateFormKahootQuestionService =
 
 export const getFormKahootQuestionService =
   (formKahootModel: FormKahootModel) =>
-  async (query: QuestionKahootQuerySchema, form_uuid: string) => {
-    const form_id = await formKahootModel.getAllDataFormKahoots(form_uuid);
-    const form = await formKahootModel.getQuestionsKahoot(query, form_id.id);
+  async (query: QuestionKahootQuerySchema, formUuid: string) => {
+    const formId = await formKahootModel.getAllDataFormKahoots(formUuid);
+    const form = await formKahootModel.getQuestionsKahoot(query, formId.id);
     if (!form) {
       throw new AppError("Failed to get Form", 401);
     }
@@ -110,6 +119,7 @@ export const deleteFormKahootQuestionService = (
   };
 };
 
+// Publish
 export const publishFormKahootService = (formKahootModel: FormKahootModel) => {
   return async (payload: PublishFormKahootBodySchema) => {
     const filteredPayload = {
@@ -121,6 +131,38 @@ export const publishFormKahootService = (formKahootModel: FormKahootModel) => {
     const form = await formKahootModel.publishFormKahoot(filteredPayload);
     if (!form) {
       throw new AppError("Failed to publish Form", 401);
+    }
+    return form;
+  };
+};
+
+
+export const getPublishedFormKahootService =
+  (formKahootModel: FormKahootModel) => async () => {
+    const form = await formKahootModel.getPublishedForm();
+    if (!form) {
+      throw new AppError("Failed to Get Form", 401);
+    }
+    return form;
+  };
+
+export const unPublishFormKahootService = (formKahootModel: FormKahootModel) => {
+  return async (uuid: string) => {
+    const form = await formKahootModel.unPublished(uuid);
+    if (!form) {
+      throw new AppError("Failed to unpublish Form", 401);
+    }
+    return form;
+  };
+};
+
+
+export const getFormKahootQuizQuestionService = (formKahootModel: FormKahootModel) => {
+  return async (formUuid: string) => {
+    const formId = await formKahootModel.getAllDataFormKahoots(formUuid);
+    const form = await formKahootModel.getQuizQuestion(formId.id);
+    if (!form) {
+      throw new AppError("Failed to get Quiz Questions", 401);
     }
     return form;
   };

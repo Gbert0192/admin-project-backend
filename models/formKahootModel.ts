@@ -27,6 +27,11 @@ interface FormKahootQuestionResponse extends QuestionKahoot {
   total: number;
 }
 
+interface QuestionIdMap {
+  id: number;
+  uuid: string;
+}
+
 export class FormKahootModel extends BaseModel {
   async createFormKahoot(payload: FormKahootBodySchema) {
     const value = Object.values(payload);
@@ -72,11 +77,17 @@ export class FormKahootModel extends BaseModel {
     };
   }
 
+  async getDetail(uuid: string) {
+    const query = `SELECT fk.* FROM form_kahoot AS fk LEFT JOIN questions_kahoot AS qk ON fk.id = qk.form_id WHERE fk.deleted_at IS NULL and fk.uuid = $1 and is_published = true GROUP BY fk.id, fk.form_title, fk.created_at, fk.updated_at, fk.deleted_at ORDER BY GREATES(fk.updated_at, fk.created_at) DESC NULLS LAST`;
+
+    const result = await this._db.query(query, [uuid]);
+    return result.rows[0] as FormKahoot;
+  }
+
   async getAllDataFormKahoots(uuid: string) {
     const query = `SELECT * FROM form_kahoot WHERE uuid = $1 and deleted_at is null`;
     const result = await this._db.query(query, [uuid]);
-    const forms = result.rows[0];
-    return forms as FormKahoot;
+    return result.rows[0] as FormKahoot;
   }
 
   async getFormKahootByTitle(name: string) {
@@ -270,5 +281,73 @@ export class FormKahootModel extends BaseModel {
       uuid,
     ]);
     return result.rows[0] as FormKahoot;
+  }
+
+  async getPublishedForm() {
+    const query = `SELECT * from form_kahoot WHERE is_published = true AND deleted_at is NULL`;
+    const result = await this._db.query(query);
+    return result.rows as FormKahoot[];
+  }
+
+  async unPublished(uuid: string) {
+    const query = `UPDATE form_kahoot SET is_published = false, updated_at = now() WHERE uuid = $1 RETURNNING *`;
+    const data = await this._db.query(query, [uuid]);
+    return data.rows[0] as FormKahoot;
+  }
+
+  async getQuizQuestion (form_id: number) {
+    const query = `WITH RankedQuestions AS (
+      SELECT
+        q.*,
+        ROW_NUMBER() OVER(PARTITION BY q.question_type ORDER BY RANDOM()) AS random_rank
+      FROM
+        questions_kahoot q
+      WHERE
+        q.form_id = $1
+    )
+      SELECT
+        rq.uuid,
+        rq.question_text,
+        rq.question_type,
+        rq.created_at,
+        COALESCE(
+          JSON_AGG(
+            JSON_BUILD_OBJECT(
+              'id', opt.id
+              'option_text', opt.option_text,
+              'is_correct', opt.is_correct
+            )
+          ) FILTER (WHERE opt.id IS NOT NULL),
+           '[]'::json
+        ) AS options
+      FROM
+        RankedQuestions rq
+      JOIN 
+        form_kahoot fk ON rq.form_id = fk.id
+      LEFT JOIN
+        options_kahoot opt ON rq.id = opt.question_id
+      WHERE
+        CASE
+          WHEN rq.question_type = 'single_choice' THEN rq.random_rank <= fk.published_single_choice_count
+          WHEN rq.question_type = 'multiple_choice' THEN rq.random_rank <= fk.published_multiple_choice_count
+          WHEN rq.question_type = 'true_false' THEN rq.random_rank <= fk.published_true_false_choice_count
+          ELSE FALSE
+        END
+      GROUP BY
+        rq.id,
+        rq.uuid,
+        rq.question_text,
+        rq.question_type,
+        rq.created_at
+      ORDER BY RANDOM()
+    `;
+    const result = await this._db.query(query, [form_id]);
+    return result.rows as FormKahootQuestionResponse[];
+  }
+
+  async getIdQuestionsByUuidBulk(uuids: string[]) {
+    const query = `SELECT id, uuid FROM question_kahoot WHERE uuid = ANY($1::text[])`;
+    const result = await this._db.query(query, [uuids]);
+    return result.rows as QuestionIdMap[];
   }
 }

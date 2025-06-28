@@ -11,7 +11,7 @@ export const formKahootBodySchema = z.object({
 });
 
 export const formKahootQuerySchema = z.object({
-  form_name: z.coerce.string().optional(),
+  form_title: z.coerce.string().optional(),
   limit: z.coerce.number().int().positive().optional(),
   page: z.coerce.number().int().positive().optional(),
 });

@@ -17,7 +17,10 @@ import {
   DeleteFormKahootQuestionController,
   GetFormKahootController,
   GetFormKahootQuestionController,
+  GetFormKahootQuizQuestionController,
+  GetPublishedFormKahootController,
   PublishFormKahootController,
+  UnPublishedFormKahootController,
   UpdateFormKahootController,
   UpdateFormKahootQuestionController,
 } from "../controllers/formKahootController.js";
@@ -69,8 +72,23 @@ FormKahootRouter.delete(
   DeleteFormKahootQuestionController
 );
 
+// Publish
 FormKahootRouter.post(
   "/publish",
   ValidateSchema(publishFormKahootBodySchema, "body"),
   PublishFormKahootController
+);
+
+FormKahootRouter.get("/published", GetPublishedFormKahootController);
+
+FormKahootRouter.put(
+  "/unpublish/:formUuid",
+  ValidateSchema(formKahootDeleteQuerySchema, "params"),
+  UnPublishedFormKahootController
+);
+
+// User
+FormKahootRouter.get(
+  "/uiz/:formUuid",
+  GetFormKahootQuizQuestionController
 );

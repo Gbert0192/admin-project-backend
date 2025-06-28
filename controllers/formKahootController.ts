@@ -11,6 +11,11 @@ import {
   updateFormKahootQuestionService,
   deleteFormKahootQuestionService,
   getFormKahootService,
+  getFormKahootDetailService,
+  getPublishedFormKahootService,
+  publishFormKahootService,
+  unPublishFormKahootService,
+  getFormKahootQuizQuestionService,
 } from "../services/formKahootServices.js";
 import { pickKey } from "../utils/queryHelper.js";
 
@@ -70,6 +75,31 @@ export const GetFormKahootController = async (
       message: "Get Form successfully!",
       total: total,
       totalPages,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const GetFormKahootDetailController = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const formKahootModel = new FormKahootModel(pool);
+    const formUuid = req.params.formUuid;
+    const form = await getFormKahootDetailService(formKahootModel)(formUuid);
+    const filteredFormKahoot = pickKey(form, [
+      "uuid",
+      "form_title",
+      "form_description",
+      "is_published",
+      "created_at",
+      "published_single_choice_count",
+      "published_multiple_choice_count",
+      "published_true_false_count",      
+    ]);
+    res.send({
+      data: filteredFormKahoot,
+      code: 201,
+      message: "Get Form successfully!",
     });
   } catch (error) {
     next(error);
@@ -226,7 +256,7 @@ export const PublishFormKahootController = async (
   try {
     await createTransaction(pool)(async (trx) => {
       const formKahootModel = new FormKahootModel(trx);
-      const form = await formKahootModel.publishFormKahoot(req.body);
+      const form = await publishFormKahootService(formKahootModel)(req.body);
       pickKey(form, [
         "uuid",
         "is_published",
@@ -239,6 +269,93 @@ export const PublishFormKahootController = async (
         code: 201,
         message: "Publish Form successfully!",
       });
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const UnPublishedFormKahootController = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    await createTransaction(pool)(async (trx) => {
+      const formKahootModel = new FormKahootModel(trx);
+      const uuid = req.params.formUuid;
+      const form = await unPublishFormKahootService(formKahootModel)(uuid);
+      const filteredFormKahoot = pickKey(form, [
+        "uuid",
+        "form_title",
+        "form_description",
+        "is_published",
+        "created_at",
+      ]);
+      res.send({
+        data: filteredFormKahoot,
+        code: 201,
+        message: "Unpublish Form successfully!",
+      });
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const GetPublishedFormKahootController = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const formKahootModel = new FormKahootModel(pool);
+    const form = await getPublishedFormKahootService(formKahootModel)();
+    const filteredFormKahoot = form.map((item) =>
+      pickKey(item, [
+        "is_published",
+        "published_single_choice_count",
+        "published_multiple_choice_count",
+        "published_true_false_count",
+        "uuid",
+        "form_title",
+        "form_description",
+        "duration",
+      ])
+    );
+    res.send({
+      data: filteredFormKahoot,
+      code: 201,
+      message: "Get Published Form successfully!",
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const GetFormKahootQuizQuestionController = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const formKahootModel = new FormKahootModel(pool);
+    const formUuid = req.params.formUuid;
+    const questions = await getFormKahootQuizQuestionService(formKahootModel)(formUuid);
+    const formDetail = await getFormKahootDetailService(formKahootModel)(formUuid);
+    const filteredFormKahoot = questions.map((item) => 
+    pickKey(item, [
+      "uuid",
+      "question_text",
+      "question_type",
+      "created_at",
+      "options",
+    ])
+    );
+    res.send({
+      data: filteredFormKahoot,
+      code: 201,
+      message: "Get Quiz Question successfully!",
+      form_title: formDetail.form_title,
+      form_description: formDetail.form_description,
+      duration: formDetail.duration,
+      form_uuid: formDetail.uuid,
     });
   } catch (error) {
     next(error);
