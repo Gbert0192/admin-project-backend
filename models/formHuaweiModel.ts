@@ -4,7 +4,6 @@ import {
   FormHuaweiQuestionQuerySchema,
   FormHuaweiUpdateBodySchema,
   OptionHuaweiSchema,
-  PublishFormBodySchema,
   QuestionsHuaweiBodySchema,
   QuestionsHuaweiUpdateBodySchema,
 } from "../schemas/formHuaweiSchema/formHuawei.schema.js";
@@ -41,12 +40,27 @@ export class FormHuaweiModel extends BaseModel {
     const query = `INSERT INTO form_huawei (${keys}) VALUES (${placeholder}) RETURNING *`;
     const result = await this._db.query(query, value);
     const forms = result.rows[0];
-    return forms;
+    return forms as FormHuawei;
   }
 
-  async getPublished() {
-    const query = `select * from form_huawei where is_published = true and deleted_at is null`;
-    const result = await this._db.query(query);
+  async getPublished(userId: number) {
+    const query = `
+    SELECT 
+      fh.*
+    FROM 
+      form_huawei fh
+    WHERE 
+      fh.is_published = true 
+      AND fh.deleted_at IS NULL
+      AND NOT EXISTS (
+        SELECT 1 
+        FROM huawei_quiz_attempts hqa
+        WHERE 
+          hqa.form_huawei_id = fh.id AND hqa.user_id = $1
+      );
+  `;
+
+    const result = await this._db.query(query, [userId]);
     return result.rows as FormHuawei[];
   }
   async get(q: FormHuaweiQuerySchema) {
@@ -161,8 +175,8 @@ export class FormHuaweiModel extends BaseModel {
     );
     const optionsResults = await Promise.all(optionsQueryPromises);
     optionsToReturn = optionsResults.map(
-      (result) => result.rows[0]
-    ) as OptionHuaweiSchema[];
+      (result) => result.rows[0] as OptionHuaweiSchema
+    );
 
     return {
       question: newQuestion,
@@ -208,8 +222,8 @@ export class FormHuaweiModel extends BaseModel {
     );
     const optionsResults = await Promise.all(optionsQueryPromises);
     optionsToReturn = optionsResults.map(
-      (result) => result.rows[0]
-    ) as OptionHuaweiSchema[];
+      (result) => result.rows[0] as OptionHuaweiSchema
+    );
 
     return {
       question: updatedQuestion,
@@ -291,13 +305,13 @@ export class FormHuaweiModel extends BaseModel {
   async deleteQuestion(uuid: string) {
     const query = `DELETE FROM questions_huawei WHERE uuid = $1 returning *`;
     const data = await this._db.query(query, [uuid]);
-    return data.rows[0];
+    return data.rows[0] as FormHuawei;
   }
 
   async unPublish(uuid: string) {
     const query = `UPDATE form_huawei SET is_published = false, updated_at = now() WHERE uuid = $1 returning *`;
     const data = await this._db.query(query, [uuid]);
-    return data.rows[0];
+    return data.rows[0] as FormHuawei;
   }
 
   async getQuizQuestion(form_id: number) {

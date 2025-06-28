@@ -1,5 +1,6 @@
 import { AppError } from "../middleware/errorMiddleware.js";
 import { FormHuaweiModel } from "../models/formHuaweiModel.js";
+import { UserModel } from "../models/userModel.js";
 import {
   FormHuaweiBodySchema,
   FormHuaweiQuerySchema,
@@ -71,8 +72,11 @@ export const getFormHuaweiDetailService =
     return form;
   };
 export const getPublishedFormHuaweiService =
-  (formHuaweiModel: FormHuaweiModel) => async () => {
-    const form = await formHuaweiModel.getPublished();
+  (models: { formHuaweiModel: FormHuaweiModel; userModel: UserModel }) =>
+  async (userUuid: string) => {
+    const { formHuaweiModel, userModel } = models;
+    const userDetails = await userModel.getDetails(userUuid);
+    const form = await formHuaweiModel.getPublished(userDetails.id);
     if (!form) {
       throw new AppError("Failed to Get Form", 401);
     }

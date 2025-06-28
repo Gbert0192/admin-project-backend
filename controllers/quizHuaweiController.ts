@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from "express";
 import pool from "../config/database.js";
 import { QuizHuaweiModel } from "../models/quizHuaweiModel.js";
 import {
+  getIsAllowedQuizService,
   getQuizHistoryService,
   postQuizService,
 } from "../services/quizHuaweiServices.js";
@@ -55,6 +56,34 @@ export const PostQuizController = async (
         code: 201,
         message: "Permission created successfully!",
       });
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const GetIsAllowedQuizController = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const quizHuaweiModel = new QuizHuaweiModel(pool);
+    const formHuaweiModel = new FormHuaweiModel(pool);
+    const userModel = new UserModel(pool);
+    const userUuid = req?.user?.uuid;
+    const formUuid = req.params.formUuid;
+
+    const data = await getIsAllowedQuizService({
+      quizHuaweiModel,
+      formHuaweiModel,
+      userModel,
+    })(userUuid!, formUuid);
+
+    res.send({
+      data: data,
+      code: 201,
+      message: "Get Form successfully!",
     });
   } catch (error) {
     next(error);

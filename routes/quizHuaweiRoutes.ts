@@ -1,5 +1,6 @@
 import { Router } from "express";
 import {
+  GetIsAllowedQuizController,
   GetQuizHistoryController,
   PostQuizController,
 } from "../controllers/quizHuaweiController.js";
@@ -14,3 +15,4 @@ QuizHuaweiRouter.post(
   ValidateSchema(submitQuizPayload, "body"),
   PostQuizController
 );
+QuizHuaweiRouter.get("/:formUuid/allowed", GetIsAllowedQuizController);

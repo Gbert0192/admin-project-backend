@@ -74,3 +74,20 @@ export const postQuizService = (model: {
     return quiz;
   };
 };
+
+export const getIsAllowedQuizService = (models: {
+  quizHuaweiModel: QuizHuaweiModel;
+  formHuaweiModel: FormHuaweiModel;
+  userModel: UserModel;
+}) => {
+  return async (user_uuid: string, form_uuid: string) => {
+    const { formHuaweiModel, quizHuaweiModel, userModel } = models;
+    const formDetails = await formHuaweiModel.getDetails(form_uuid);
+    const userDetails = await userModel.getDetails(user_uuid);
+    const quiz = await quizHuaweiModel.getIsAllowed(
+      userDetails.id,
+      formDetails.id
+    );
+    return quiz;
+  };
+};

@@ -116,7 +116,7 @@ export class RoleModel extends BaseModel {
       RETURNING *
     `;
     const result = await this._db.query(query, [uuid]);
-    return result.rows[0];
+    return result.rows[0] as Role;
   }
 
   async getRolePermissionById(id: number) {

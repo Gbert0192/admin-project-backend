@@ -1,7 +1,4 @@
-import {
-  ChangePasswordSchemaPayload,
-  UpdateUserSchemaPayload,
-} from "../schemas/user/user.schema.js";
+import { UpdateUserSchemaPayload } from "../schemas/user/user.schema.js";
 import { User } from "../schemas/user/user.type.js";
 import {
   createQueryParams,

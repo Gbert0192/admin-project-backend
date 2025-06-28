@@ -19,6 +19,7 @@ import {
   getFormHuaweiQuizQuestionService,
 } from "../services/formHuaweiServices.js";
 import { pickKey } from "../utils/queryHelper.js";
+import { UserModel } from "../models/userModel.js";
 
 export const GetFormHuaweiController = async (
   req: Request,
@@ -77,6 +78,7 @@ export const GetFormHuaweiDetailController = async (
       "form_description",
       "is_published",
       "created_at",
+      "durations",
       "published_single_choice_count",
       "published_multiple_choice_count",
       "published_true_false_count",
@@ -99,7 +101,12 @@ export const GetPublishedFormHuaweiController = async (
 ) => {
   try {
     const formHuaweiModel = new FormHuaweiModel(pool);
-    const form = await getPublishedFormHuaweiService(formHuaweiModel)();
+    const userModel = new UserModel(pool);
+    const userUuid = req?.user?.uuid;
+    const form = await getPublishedFormHuaweiService({
+      formHuaweiModel,
+      userModel,
+    })(userUuid!);
     const filteredFormHuawei = form.map((item) =>
       pickKey(item, [
         "is_published",

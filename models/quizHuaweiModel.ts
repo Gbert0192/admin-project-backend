@@ -54,4 +54,10 @@ export class QuizHuaweiModel extends BaseModel {
     }
     return attemptResult.rows[0] as HuaweiQuizAttempt;
   }
+
+  async getIsAllowed(user_id: number, form_huawei_id: number) {
+    const query = `select * from huawei_quiz_attempts where user_id = $1 and form_huawei_id = $2`;
+    const result = await this._db.query(query, [user_id, form_huawei_id]);
+    return result.rows.length > 0;
+  }
 }

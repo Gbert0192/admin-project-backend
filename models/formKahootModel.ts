@@ -156,8 +156,8 @@ export class FormKahootModel extends BaseModel {
 
     const optionsResults = await Promise.all(optionsQueryPromises);
     optionsToReturn = optionsResults.map(
-      (result) => result.rows[0]
-    ) as OptionsKahootSchema[];
+      (result) => result.rows[0] as OptionsKahootSchema
+    );
 
     return {
       question: newQuestion,
@@ -238,8 +238,8 @@ export class FormKahootModel extends BaseModel {
 
     const optionsResults = await Promise.all(optionsQueryPromises);
     optionsToReturn = optionsResults.map(
-      (result) => result.rows[0]
-    ) as OptionsKahootSchema[];
+      (result) => result.rows[0] as OptionsKahootSchema
+    );
 
     return {
       question: updatedQuestion,
@@ -295,7 +295,7 @@ export class FormKahootModel extends BaseModel {
     return data.rows[0] as FormKahoot;
   }
 
-  async getQuizQuestion (form_id: number) {
+  async getQuizQuestion(form_id: number) {
     const query = `WITH RankedQuestions AS (
       SELECT
         q.*,

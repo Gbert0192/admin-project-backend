@@ -65,21 +65,21 @@ export class PermissionModel extends BaseModel {
       RETURNING *
     `;
     const result = await this._db.query(query, [route, permission_name, uuid]);
-    return result.rows[0] ?? null;
+    return result.rows[0] as Permission;
   }
 
   async deletePermission(uuid: string) {
     const query =
       "update permissions SET deleted_at = NOW() WHERE uuid = $1 RETURNING *";
     const result = await this._db.query(query, [uuid]);
-    return result.rows[0] || null;
+    return result.rows[0] as Permission;
   }
 
   async getIdByUuidBulk(uuids: string[]) {
     const placeholders = uuids.map((_, i) => `$${i + 1}`).join(", ");
     const query = `SELECT id FROM permissions WHERE uuid IN (${placeholders})`;
     const result = await this._db.query(query, uuids);
-    const ids = result.rows.map((row) => row.id);
+    const ids = result.rows.map((row) => row.id as number);
     return ids as number[];
   }
 
