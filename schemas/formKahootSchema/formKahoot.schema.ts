@@ -7,7 +7,7 @@ export const formKahootBodySchema = z.object({
     .string()
     .min(1, { message: "Form Description is required." }),
   is_published: z.boolean().default(false),
-  duration: z.number().min(5).max(120).default(20),
+  duration: z.string(),
 });
 
 export const formKahootQuerySchema = z.object({
@@ -22,7 +22,7 @@ export const formKahootUpdateBodySchema = z.object({
   form_description: z
     .string()
     .min(1, { message: "Form Description is required." }),
-  duration: z.number().min(5).max(120).default(20),
+  duration: z.string(),
 });
 
 export const formKahootDeleteQuerySchema = z.object({
