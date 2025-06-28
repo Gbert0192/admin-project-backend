@@ -290,7 +290,7 @@ export class FormKahootModel extends BaseModel {
   }
 
   async unPublished(uuid: string) {
-    const query = `UPDATE form_kahoot SET is_published = false, updated_at = now() WHERE uuid = $1 RETURNNING *`;
+    const query = `UPDATE form_kahoot SET is_published = false, updated_at = now() WHERE uuid = $1 RETURNING *`;
     const data = await this._db.query(query, [uuid]);
     return data.rows[0] as FormKahoot;
   }
