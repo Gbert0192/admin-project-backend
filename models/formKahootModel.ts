@@ -313,7 +313,7 @@ export class FormKahootModel extends BaseModel {
         COALESCE(
           JSON_AGG(
             JSON_BUILD_OBJECT(
-              'id', opt.id
+              'id', opt.id,
               'option_text', opt.option_text,
               'is_correct', opt.is_correct
             )
