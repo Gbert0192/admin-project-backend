@@ -1,15 +1,15 @@
 import { BaseModel } from "./baseModel.js";
 
 export class DashboardUserModel extends BaseModel {
-  async getQuizComplete(userId: number) {
+  async getQuizComplete(userId: number): Promise<number> {
     const query = `
-    SELECT *, COUNT(*) OVER () AS total_count
-    FROM huawei_quiz_attempts
-    WHERE user_id = $1;
+      SELECT COUNT(*) 
+      FROM huawei_quiz_attempts
+      WHERE user_id = $1;
     `;
     const result = await this._db.query(query, [userId]);
-    const rows = result.rows[0].total_count;
-    return rows as number;
+    const totalCount = parseInt(result.rows[0].count, 10) || 0;
+    return totalCount;
   }
   async getAverageScore(userId: number): Promise<number | null> {
     const query = `
@@ -29,7 +29,6 @@ export class DashboardUserModel extends BaseModel {
     if (averageScore === null || averageScore === undefined) {
       return null;
     }
-    console.log(averageScore);
 
     return Math.round(averageScore);
   }
