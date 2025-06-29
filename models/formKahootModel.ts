@@ -78,12 +78,25 @@ export class FormKahootModel extends BaseModel {
   }
 
   async getDetail(uuid: string) {
-    const query = `SELECT fk.* FROM form_kahoot AS fk LEFT JOIN questions_kahoot AS qk ON fk.id = qk.form_id WHERE fk.deleted_at IS NULL and fk.uuid = $1 and is_published = true GROUP BY fk.id, fk.form_title, fk.created_at, fk.updated_at, fk.deleted_at ORDER BY GREATES(fk.updated_at, fk.created_at) DESC NULLS LAST`;
+    const query = `
+      SELECT 
+        fk.* FROM 
+        form_kahoot AS fk 
+      LEFT JOIN 
+        questions_kahoot AS qk ON fk.id = qk.form_id 
+      WHERE 
+        fk.deleted_at IS NULL 
+        AND fk.uuid = $1 
+        AND is_published = true 
+      GROUP BY 
+        fk.id
+      ORDER BY 
+        GREATEST(fk.updated_at, fk.created_at) DESC NULLS LAST
+    `;
 
     const result = await this._db.query(query, [uuid]);
     return result.rows[0] as FormKahoot;
   }
-
   async getAllDataFormKahoots(uuid: string) {
     const query = `SELECT * FROM form_kahoot WHERE uuid = $1 and deleted_at is null`;
     const result = await this._db.query(query, [uuid]);
