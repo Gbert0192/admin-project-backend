@@ -23,3 +23,35 @@ export const getTotalUsersService = (
         return result;
   };
 };
+
+export const getDashboardCardDescriptionsService = (
+  dashboardAdminModel: DashboardAdminModel) => {
+    return async () => {
+        const result = await dashboardAdminModel.getDashboardCardDescriptions();
+        return result;
+    };
+};
+
+export const getFormCreationTrendsService = (
+  dashboardAdminModel: DashboardAdminModel) => {
+    return async (months: number = 12) => {
+        const result = await dashboardAdminModel.getFormCreationTrends(months);
+        return result;
+    };
+};
+
+export const getHuaweiFormAttemptStatsService = (
+  dashboardAdminModel: DashboardAdminModel) => {
+    return async () => {
+        const result = await dashboardAdminModel.getHuaweiFormAttemptStats();
+        return result;
+    };
+};
+
+export const getKahootFormAttemptStatsService = (
+  dashboardAdminModel: DashboardAdminModel) => {
+    return async () => {
+        const result = await dashboardAdminModel.getKahootFormAttemptStats();
+        return result;
+    };
+};

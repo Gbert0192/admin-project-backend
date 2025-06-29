@@ -89,6 +89,6 @@ FormKahootRouter.put(
 
 // User
 FormKahootRouter.get(
-  "/uiz/:formUuid",
+  "/quiz/:formUuid",
   GetFormKahootQuizQuestionController
 );

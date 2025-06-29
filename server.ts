@@ -14,6 +14,7 @@ import { FormKahootRouter } from "./routes/formKahootRoutes.js";
 import { DashboardAdminRouter } from "./routes/dashboardAdminRoutes.js";
 import { DashboardUserRouter } from "./routes/dashboardUserRoutes.js";
 import { QuizHuaweiRouter } from "./routes/quizHuaweiRoutes.js";
+import { QuizKahootRouter } from "./routes/quizKahootRoutes.js";
 
 dotenv.config();
 
@@ -41,6 +42,7 @@ app.use("/dashboard-admin", DashboardUserRouter);
 app.use("/form-huawei", FormHuaweiRouter);
 app.use("/form-kahoot", FormKahootRouter);
 app.use("/quiz-huawei", QuizHuaweiRouter);
+app.use("/quiz-kahoot", QuizKahootRouter);
 
 app.use(errorHandler);
 
