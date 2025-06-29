@@ -38,7 +38,6 @@ FormKahootRouter.get(
   ValidateSchema(formKahootQuerySchema, "query"),
   GetFormKahootController
 );
-FormKahootRouter.get("/:formUuid", GetFormKahootDetailController);
 FormKahootRouter.put(
   "/",
   ValidateSchema(formKahootUpdateBodySchema, "body"),
@@ -94,3 +93,5 @@ FormKahootRouter.get(
   "/quiz/:formUuid",
   GetFormKahootQuizQuestionController
 );
+
+FormKahootRouter.get("/:formUuid", GetFormKahootDetailController);

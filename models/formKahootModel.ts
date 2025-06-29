@@ -80,14 +80,15 @@ export class FormKahootModel extends BaseModel {
   async getDetail(uuid: string) {
     const query = `
       SELECT 
-        fk.* FROM 
+        fk.*
+      FROM 
         form_kahoot AS fk 
       LEFT JOIN 
         questions_kahoot AS qk ON fk.id = qk.form_id 
       WHERE 
         fk.deleted_at IS NULL 
         AND fk.uuid = $1 
-        AND is_published = true 
+        AND fk.is_published = true 
       GROUP BY 
         fk.id
       ORDER BY 
@@ -269,8 +270,8 @@ export class FormKahootModel extends BaseModel {
   async publishFormKahoot(payload: {
     uuid: string;
     is_published: boolean;
-    multiple_choice_question: number;
     single_choice_question: number;
+    multiple_choice_question: number;
     true_false_question: number;
   }) {
     const {
@@ -282,7 +283,7 @@ export class FormKahootModel extends BaseModel {
     } = payload;
     const query = `
             UPDATE form_kahoot
-            SET is_published = $1, published_multiple_choice_count = $2, published_single_choice_count = $3, published_true_false_count = $4, updated_at = now()
+            SET is_published = $1, published_single_choice_count = $2, published_multiple_choice_count = $3, published_true_false_count = $4, updated_at = now()
             WHERE uuid = $5
             RETURNING *
         `;
@@ -343,7 +344,7 @@ export class FormKahootModel extends BaseModel {
         CASE
           WHEN rq.question_type = 'single_choice' THEN rq.random_rank <= fk.published_single_choice_count
           WHEN rq.question_type = 'multiple_choice' THEN rq.random_rank <= fk.published_multiple_choice_count
-          WHEN rq.question_type = 'true_false' THEN rq.random_rank <= fk.published_true_false_choice_count
+          WHEN rq.question_type = 'true_false' THEN rq.random_rank <= fk.published_true_false_count
           ELSE FALSE
         END
       GROUP BY
@@ -359,7 +360,7 @@ export class FormKahootModel extends BaseModel {
   }
 
   async getIdQuestionsByUuidBulk(uuids: string[]) {
-    const query = `SELECT id, uuid FROM question_kahoot WHERE uuid = ANY($1::text[])`;
+    const query = `SELECT id, uuid FROM questions_kahoot WHERE uuid = ANY($1::text[])`;
     const result = await this._db.query(query, [uuids]);
     return result.rows as QuestionIdMap[];
   }
