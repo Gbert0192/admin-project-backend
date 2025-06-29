@@ -16,6 +16,7 @@ import {
   DeleteFormKahootController,
   DeleteFormKahootQuestionController,
   GetFormKahootController,
+  GetFormKahootDetailController,
   GetFormKahootQuestionController,
   GetFormKahootQuizQuestionController,
   GetPublishedFormKahootController,
@@ -37,6 +38,7 @@ FormKahootRouter.get(
   ValidateSchema(formKahootQuerySchema, "query"),
   GetFormKahootController
 );
+FormKahootRouter.get("/:formUuid", GetFormKahootDetailController);
 FormKahootRouter.put(
   "/",
   ValidateSchema(formKahootUpdateBodySchema, "body"),
