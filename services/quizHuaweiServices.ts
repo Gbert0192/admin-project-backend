@@ -32,6 +32,7 @@ export const postQuizService = (model: {
       score: payload.score,
       duration_seconds: payload.duration_seconds,
       user_id: userDetail.id,
+      max_score: payload.max_score,
       form_huawei_id: formDetail.id,
     };
     const questionUuids = payload.attempt_answers.map(

@@ -40,6 +40,10 @@ export const createFormHuaweiQuestionService =
 export const updateFormHuaweiQuestionService =
   (formHuaweiModel: FormHuaweiModel) =>
   async (payload: QuestionsHuaweiUpdateBodySchema) => {
+    const formDetail = await formHuaweiModel.getDetails(payload.formUuid);
+    if (formDetail.is_published) {
+      throw new AppError("Form is published and Cant Be Edited", 401);
+    }
     const form = await formHuaweiModel.updateQuestion(payload);
     if (!form) {
       throw new AppError("Failed to Update Formm", 401);
@@ -85,6 +89,10 @@ export const getPublishedFormHuaweiService =
 
 export const updateFormHuaweiService = (formHuaweiModel: FormHuaweiModel) => {
   return async (payload: FormHuaweiUpdateBodySchema) => {
+    const existingForm = await formHuaweiModel.getDetails(payload.uuid);
+    if (existingForm.is_published) {
+      throw new AppError("You Cant Edit Published Form!", 400);
+    }
     const form = await formHuaweiModel.update(payload);
     if (!form) {
       throw new AppError("Failed to create Formm", 401);

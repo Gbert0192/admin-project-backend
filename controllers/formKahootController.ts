@@ -81,7 +81,11 @@ export const GetFormKahootController = async (
   }
 };
 
-export const GetFormKahootDetailController = async (req: Request, res: Response, next: NextFunction) => {
+export const GetFormKahootDetailController = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   try {
     const formKahootModel = new FormKahootModel(pool);
     const formUuid = req.params.formUuid;
@@ -94,7 +98,7 @@ export const GetFormKahootDetailController = async (req: Request, res: Response,
       "created_at",
       "published_single_choice_count",
       "published_multiple_choice_count",
-      "published_true_false_count",      
+      "published_true_false_count",
     ]);
     res.send({
       data: filteredFormKahoot,
@@ -115,8 +119,19 @@ export const UpdateFormKahootController = async (
     await createTransaction(pool)(async (trx) => {
       const formKahootModel = new FormKahootModel(trx);
       const form = await updateFormKahootService(formKahootModel)(req.body);
+      const filteredFormKahoot = pickKey(form, [
+        "uuid",
+        "form_title",
+        "form_description",
+        "duration",
+        "is_published",
+        "published_single_choice_count",
+        "published_multiple_choice_count",
+        "published_true_false_count",
+        "created_at",
+      ]);
       res.send({
-        data: form,
+        data: filteredFormKahoot,
         code: 201,
         message: "Update Form successfully!",
       });
@@ -303,7 +318,11 @@ export const UnPublishedFormKahootController = async (
   }
 };
 
-export const GetPublishedFormKahootController = async (req: Request, res: Response, next: NextFunction) => {
+export const GetPublishedFormKahootController = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   try {
     const formKahootModel = new FormKahootModel(pool);
     const form = await getPublishedFormKahootService(formKahootModel)();
@@ -337,16 +356,20 @@ export const GetFormKahootQuizQuestionController = async (
   try {
     const formKahootModel = new FormKahootModel(pool);
     const formUuid = req.params.formUuid;
-    const questions = await getFormKahootQuizQuestionService(formKahootModel)(formUuid);
-    const formDetail = await getFormKahootDetailService(formKahootModel)(formUuid);
-    const filteredFormKahoot = questions.map((item) => 
-    pickKey(item, [
-      "uuid",
-      "question_text",
-      "question_type",
-      "created_at",
-      "options",
-    ])
+    const questions = await getFormKahootQuizQuestionService(formKahootModel)(
+      formUuid
+    );
+    const formDetail = await getFormKahootDetailService(formKahootModel)(
+      formUuid
+    );
+    const filteredFormKahoot = questions.map((item) =>
+      pickKey(item, [
+        "uuid",
+        "question_text",
+        "question_type",
+        "created_at",
+        "options",
+      ])
     );
     res.send({
       data: filteredFormKahoot,

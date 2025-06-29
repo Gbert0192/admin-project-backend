@@ -38,6 +38,12 @@ UserRouter.put(
 );
 
 UserRouter.put(
+  "/admin",
+  ValidateSchema(updateUserSchema, "body"),
+  UpdateUserController
+);
+
+UserRouter.put(
   "/promote",
   ValidateSchema(promoteUserSchema, "body"),
   PromoteUserController

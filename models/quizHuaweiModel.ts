@@ -5,6 +5,7 @@ export interface QuizHuawei {
   form_huawei_id: number;
   user_id: number;
   score: number;
+  max_score: number;
   duration_seconds: number;
 }
 
@@ -25,8 +26,8 @@ export class QuizHuaweiModel extends BaseModel {
     answerPayloads: AttemptAnswerPayload[]
   ) {
     const attemptInsertQuery = `
-      INSERT INTO huawei_quiz_attempts (form_huawei_id, user_id, score, duration_seconds)
-      VALUES ($1, $2, $3, $4)
+      INSERT INTO huawei_quiz_attempts (form_huawei_id, user_id, score, duration_seconds, max_score)
+      VALUES ($1, $2, $3, $4, $5)
       RETURNING id;
     `;
     const attemptResult = await this._db.query(attemptInsertQuery, [
@@ -34,6 +35,7 @@ export class QuizHuaweiModel extends BaseModel {
       quizPayload.user_id,
       quizPayload.score,
       quizPayload.duration_seconds,
+      quizPayload.max_score,
     ]);
 
     const newAttemptId = attemptResult.rows[0].id;

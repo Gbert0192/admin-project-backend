@@ -132,7 +132,7 @@ export class FormHuaweiModel extends BaseModel {
   }
 
   async update(payload: FormHuaweiUpdateBodySchema) {
-    const query = `UPDATE form_huawei SET form_title = $1, form_description = $2, updated_at = now() WHERE uuid = $3 returning *`;
+    const query = `UPDATE form_huawei SET form_title = $1, form_description = $2, updated_at = now() WHERE uuid = $3 and is_published is false returning *`;
     const result = await this._db.query(query, [
       payload.form_title,
       payload.form_description,

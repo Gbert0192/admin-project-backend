@@ -60,6 +60,7 @@ export const questionsHuaweiBodySchema = z
 
 export const questionsHuaweiUpdateBodySchema = z
   .object({
+    formUuid: z.string(),
     uuid: z.string().min(1, { message: "UUID is required." }),
     type: z.enum(["SINGLE_CHOICE", "MULTIPLE_CHOICE", "TRUE_FALSE", "ESSAY"]),
     point: z.number().int().positive().min(1, "Point must be greater than 0"),
