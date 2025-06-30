@@ -67,6 +67,7 @@ export const questionsKahootUpdateBodySchema = z
     question_text: z.string().min(1, { message: "Question text is required." }),
     question_type: z.enum(["single_choice", "multiple_choice", "true_false"]),
     options: z.array(optionsKahootSchema),
+    duration: z.number().min(5).max(120),
   })
   .refine(
     (data) =>
