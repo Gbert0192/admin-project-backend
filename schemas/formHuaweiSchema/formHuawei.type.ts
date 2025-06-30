@@ -8,6 +8,7 @@ export interface FormHuawei {
   published_multiple_choice_count: number;
   published_single_choice_count: number;
   published_true_false_count: number;
+  trial_limit: number;
   durations: number;
   created_at: Date;
   updated_at: Date | null;

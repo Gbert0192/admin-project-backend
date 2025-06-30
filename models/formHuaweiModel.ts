@@ -45,20 +45,19 @@ export class FormHuaweiModel extends BaseModel {
 
   async getPublished(userId: number) {
     const query = `
-    SELECT 
-      fh.*
-    FROM 
-      form_huawei fh
-    WHERE 
-      fh.is_published = true 
-      AND fh.deleted_at IS NULL
-      AND NOT EXISTS (
-        SELECT 1 
-        FROM huawei_quiz_attempts hqa
-        WHERE 
-          hqa.form_huawei_id = fh.id AND hqa.user_id = $1
-      );
-  `;
+      SELECT 
+        fh.*
+      FROM 
+        form_huawei fh
+      WHERE 
+        fh.is_published = true 
+        AND fh.deleted_at IS NULL
+        AND (
+          SELECT COUNT(*) 
+          FROM huawei_quiz_attempts hqa
+          WHERE hqa.form_huawei_id = fh.id AND hqa.user_id = $1
+        ) < fh.trial_limit;
+    `;
 
     const result = await this._db.query(query, [userId]);
     return result.rows as FormHuawei[];
@@ -279,6 +278,7 @@ export class FormHuaweiModel extends BaseModel {
     multiple_choice_question: number;
     single_choice_question: number;
     true_false_question: number;
+    trial_limit: number;
   }) {
     const {
       essay_question,
@@ -288,8 +288,12 @@ export class FormHuaweiModel extends BaseModel {
       uuid,
       is_published,
       durations,
+      trial_limit,
     } = payload;
-    const query = `UPDATE form_huawei SET is_published = $1, published_essay_count = $2, published_multiple_choice_count = $3, published_single_choice_count = $4, published_true_false_count = $5, durations = $6, updated_at = now() WHERE uuid = $7 returning *`;
+    const query = `UPDATE form_huawei SET 
+    is_published = $1, published_essay_count = $2, published_multiple_choice_count = $3, 
+    published_single_choice_count = $4, published_true_false_count = $5, durations = $6, trial_limit = $7, 
+    updated_at = now() WHERE uuid = $8 returning *`;
     const result = await this._db.query(query, [
       is_published,
       essay_question,
@@ -297,6 +301,7 @@ export class FormHuaweiModel extends BaseModel {
       single_choice_question,
       true_false_question,
       durations,
+      trial_limit,
       uuid,
     ]);
     const forms = result.rows[0] as FormHuawei;

@@ -95,6 +95,7 @@ export const publishFormBodySchema = z.object({
   multiple_choice_question: z.string(),
   single_choice_question: z.string(),
   true_false_question: z.string(),
+  trial_limit: z.string(),
 });
 
 export const formHuaweiQuestionQuerySchema = z.object({

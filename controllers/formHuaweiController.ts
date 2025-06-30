@@ -83,6 +83,7 @@ export const GetFormHuaweiDetailController = async (
       "published_multiple_choice_count",
       "published_true_false_count",
       "published_essay_count",
+      "trial_limit",
     ]);
     res.send({
       data: filteredFormHuawei,
@@ -118,6 +119,7 @@ export const GetPublishedFormHuaweiController = async (
         "form_title",
         "form_description",
         "durations",
+        "trial_limit",
       ])
     );
 

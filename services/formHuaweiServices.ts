@@ -119,6 +119,7 @@ export const publishFormHuaweiService = (formHuaweiModel: FormHuaweiModel) => {
       single_choice_question: Number(payload.single_choice_question),
       multiple_choice_question: Number(payload.multiple_choice_question),
       true_false_question: Number(payload.true_false_question),
+      trial_limit: Number(payload.trial_limit),
     };
     const form = await formHuaweiModel.publish(filteredPayload);
     if (!form) {
