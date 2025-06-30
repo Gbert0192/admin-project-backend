@@ -21,6 +21,7 @@ export interface QuestionKahoot {
   question_type: "single_choice" | "multiple_choice" | "true_false";
   created_at: Date;
   updated_at: Date | null;
+  duration: number;
 }
 
 export interface OptionKahoot {

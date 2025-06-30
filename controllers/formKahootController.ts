@@ -95,6 +95,7 @@ export const GetFormKahootDetailController = async (
       "form_title",
       "form_description",
       "is_published",
+      "duration",
       "created_at",
       "published_single_choice_count",
       "published_multiple_choice_count",

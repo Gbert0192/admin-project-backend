@@ -27,7 +27,7 @@ export const GetQuizHistoryController = async (
     res.send({
       data: data,
       code: 201,
-      message: "Get Form successfully!",
+      message: "Get Quiz History successfully!",
     });
   } catch (error) {
     next(error);

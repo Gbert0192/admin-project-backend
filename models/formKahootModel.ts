@@ -360,7 +360,7 @@ export class FormKahootModel extends BaseModel {
   }
 
   async getIdQuestionsByUuidBulk(uuids: string[]) {
-    const query = `SELECT id, uuid FROM questions_kahoot WHERE uuid = ANY($1::text[])`;
+    const query = `SELECT id, uuid FROM questions_kahoot WHERE uuid = ANY($1::uuid[])`;
     const result = await this._db.query(query, [uuids]);
     return result.rows as QuestionIdMap[];
   }
