@@ -27,7 +27,7 @@ app.use(express.urlencoded({ extended: true }));
 
 app.set("trust proxy", 1);
 
-// app.use(apiLimiter);
+app.use(apiLimiter);
 
 app.use("/auth", AuthRouter);
 
