@@ -22,7 +22,7 @@ export const formKahootUpdateBodySchema = z.object({
   form_description: z
     .string()
     .min(1, { message: "Form Description is required." }),
-    duration: z.number().min(5).max(120),
+  duration: z.number().min(5).max(120),
 });
 
 export const formKahootDeleteQuerySchema = z.object({
@@ -59,6 +59,19 @@ export const questionsKahootBodySchema = z
       message: "True/False must have exactly 2 options.",
       path: ["options"],
     }
+  )
+  .refine((data) => data.options.some((option) => option.is_correct === true), {
+    message: "At least one option must be marked as correct.",
+    path: ["options"],
+  })
+  .refine(
+    (data) =>
+      data.question_type !== "single_choice" ||
+      data.options.filter((option) => option.is_correct === true).length === 1,
+    {
+      message: "Single choice questions must have exactly one correct answer.",
+      path: ["options"],
+    }
   );
 
 export const questionsKahootUpdateBodySchema = z
@@ -67,7 +80,6 @@ export const questionsKahootUpdateBodySchema = z
     question_text: z.string().min(1, { message: "Question text is required." }),
     question_type: z.enum(["single_choice", "multiple_choice", "true_false"]),
     options: z.array(optionsKahootSchema),
-    duration: z.number().min(5).max(120),
   })
   .refine(
     (data) =>
@@ -84,6 +96,19 @@ export const questionsKahootUpdateBodySchema = z
     (data) => data.question_type !== "true_false" || data.options.length === 2,
     {
       message: "True/False must have exactly 2 options.",
+      path: ["options"],
+    }
+  )
+  .refine((data) => data.options.some((option) => option.is_correct === true), {
+    message: "At least one option must be marked as correct.",
+    path: ["options"],
+  })
+  .refine(
+    (data) =>
+      data.question_type !== "single_choice" ||
+      data.options.filter((option) => option.is_correct === true).length === 1,
+    {
+      message: "Single choice questions must have exactly one correct answer.",
       path: ["options"],
     }
   );

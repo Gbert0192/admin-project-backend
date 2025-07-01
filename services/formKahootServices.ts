@@ -54,6 +54,10 @@ export const getFormKahootDetailService =
 export const updateFormKahootService =
   (formKahootModel: FormKahootModel) =>
   async (payload: FormKahootUpdateBodySchema) => {
+    const existingForm = await formKahootModel.getAllDataFormKahoots(payload.uuid);
+    if (!existingForm) {
+      throw new AppError("Form not found", 404);
+    }
     const form = await formKahootModel.updateFormKahoot(payload);
     if (!form) {
       throw new AppError("Failed to update Form", 401);

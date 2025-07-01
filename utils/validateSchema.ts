@@ -15,9 +15,13 @@ export const ValidateSchema =
       next();
     } catch (error) {
       if (error instanceof ZodError) {
+        const firstError = error.errors[0];
+        const mainMessage = firstError?.message || "Validation failed";
+
         res.status(400).json({
-          message: "Invalid request data",
+          message: mainMessage,
           errors: error.flatten().fieldErrors,
+          details: error.errors.map((err) => err.message).join(", "),
         });
         return;
       }

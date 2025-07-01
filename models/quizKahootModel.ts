@@ -20,24 +20,18 @@ interface AttemptAnswerPayload {
 
 export class QuizKahootModel extends BaseModel {
   async createQuizAttempt(quiz: QuizKahoot, answersPayload: AttemptAnswerPayload[]) {
-    console.log("Attempting to insert quiz attempt:", quiz);
     
     const attemptInsertQuery = `INSERT INTO kahoot_quiz_attempts (form_kahoot_id, user_id, score, duration_seconds, submitted_at) VALUES ($1, $2, $3, $4, $5) RETURNING *;`;
     
-    let attemptResult;
-    try {
-      attemptResult = await this._db.query(attemptInsertQuery, [
+    
+    const attemptResult = await this._db.query(attemptInsertQuery, [
         quiz.form_kahoot_id,
         quiz.user_id,
         quiz.score,
         quiz.duration_seconds,
         quiz.submitted_at,
       ]);
-      console.log("Quiz attempt inserted successfully:", attemptResult.rows[0]);
-    } catch (error) {
-      console.error("Database error inserting quiz attempt:", error);
-      throw error;
-    }
+
     
     const newAttempId = attemptResult.rows[0].id;
 
