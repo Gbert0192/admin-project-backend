@@ -196,11 +196,11 @@ export const GetFormKahootQuestionController = async (
   try {
     const formKahootModel = new FormKahootModel(pool);
     const form_uuid = req.params.formUuid;
-    const form = await getFormKahootQuestionService(formKahootModel)(
+    const {data: form, total, limit} = await getFormKahootQuestionService(formKahootModel)(
       res.locals.cleaned,
       form_uuid
     );
-    const filteredFormKahoot = form.data.map((item) =>
+    const filteredFormKahoot = form.map((item) =>
       pickKey(item, [
         "uuid",
         "question_text",
@@ -209,10 +209,15 @@ export const GetFormKahootQuestionController = async (
         "options",
       ])
     );
+
+    const totalPages = Math.ceil(total / limit);
+
     res.send({
       data: filteredFormKahoot,
       code: 201,
-      message: "Permission created successfully!",
+      message: "Get Form successfully!",
+      total: total,
+      totalPages,
     });
   } catch (error) {
     next(error);

@@ -89,7 +89,7 @@ export const questionsKahootUpdateBodySchema = z
   );
 
 export const questionKahootQuerySchema = z.object({
-  question: z.coerce.string().optional(),
+  question_text: z.coerce.string().optional(),
   limit: z.coerce.number().int().positive().optional(),
   page: z.coerce.number().int().positive().optional(),
 });
