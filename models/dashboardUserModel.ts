@@ -13,33 +13,30 @@ interface QuizAttempts {
 export class DashboardUserModel extends BaseModel {
   async getQuizComplete(userId: number): Promise<number> {
     const query = `
-      SELECT COUNT(*) 
-      FROM huawei_quiz_attempts
-      WHERE user_id = $1;
-    `;
+    SELECT COUNT(DISTINCT form_huawei_id) 
+    FROM huawei_quiz_attempts
+    WHERE user_id = $1;
+  `;
     const result = await this._db.query(query, [userId]);
-    const totalCount = parseInt(result.rows[0].count, 10) || 0;
-    return totalCount;
+    const uniqueQuizCount = parseInt(result.rows[0].count, 10) || 0;
+
+    return uniqueQuizCount;
   }
   async getAverageScore(userId: number): Promise<number | null> {
     const query = `
-      SELECT
-        score,
-        max_score,
-        (score::NUMERIC / max_score::NUMERIC) * 100 AS average_percentage_score
-      FROM
-        huawei_quiz_attempts
-      WHERE
-        user_id = $1 and max_score > 0;
-    `;
+    SELECT 
+      AVG((score::NUMERIC / max_score::NUMERIC) * 100) AS overall_average_score
+    FROM 
+      huawei_quiz_attempts
+    WHERE 
+      user_id = $1 AND max_score > 0;
+  `;
 
     const result = await this._db.query(query, [userId]);
-
-    const averageScore = result.rows[0]?.average_percentage_score;
+    const averageScore = result.rows[0]?.overall_average_score;
     if (averageScore === null || averageScore === undefined) {
       return null;
     }
-
     return Math.round(averageScore);
   }
   async getQuizCount() {
